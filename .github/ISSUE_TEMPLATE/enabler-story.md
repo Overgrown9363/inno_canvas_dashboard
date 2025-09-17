@@ -25,7 +25,11 @@ zodat nut.
 - [ ] x
 
 ### Definition of Done
-- [ ] x
+- Alle acceptatiecriteria van de user story zijn behaald.
+- Deliverables doorstaan peer review door minimaal één teamlid (Software in Pull Requests).
+- Tests zijn geschreven en uitgevoerd, alle tests slagen; indien mogelijk is er voldoende code coverage.
+- Software deliverables doorlopen deployment pipeline.
+- Documentatie is bijgewerkt.
 
 ### References/additional information
 - x
