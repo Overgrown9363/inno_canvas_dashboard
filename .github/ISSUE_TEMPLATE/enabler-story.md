@@ -8,9 +8,9 @@ assignees: ''
 ---
 
 ## Story
-Voor de realisatie van story,
-moet er eerst doel,
-zodat nut.
+Als rol,
+wil ik functionaliteit,
+zodat goal.
 
 ### Description
 
