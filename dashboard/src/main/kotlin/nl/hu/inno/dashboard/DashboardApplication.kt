@@ -1,11 +1,11 @@
-package nl.hu.inno.backend
+package nl.hu.inno.dashboard
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class BackendApplication
+class DashboardApplication
 
 fun main(args: Array<String>) {
-	runApplication<BackendApplication>(*args)
+	runApplication<DashboardApplication>(*args)
 }

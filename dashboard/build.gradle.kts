@@ -7,7 +7,7 @@ plugins {
 
 group = "nl.hu.inno"
 version = "0.0.1-SNAPSHOT"
-description = "backend"
+description = "Demo project for Spring Boot"
 
 java {
 	toolchain {
