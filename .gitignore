@@ -1,0 +1,39 @@
+# Gradle
+.gradle/
+build/
+out/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Kotlin/Java
+*.class
+
+# Build binaries
+bin/
+
+# H2 database files
+*.mv.db
+*.trace.db
+
+# Environment files
+.env
+
+# Generated files
+generated/
+
+# Dependency caches
+**/node_modules/
