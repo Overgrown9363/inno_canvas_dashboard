@@ -1,0 +1,2 @@
+### Get a course by id
+GET http://localhost:8080/dashboard/1
