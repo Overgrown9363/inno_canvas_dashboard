@@ -1,24 +1,27 @@
 package nl.hu.inno.dashboard.dashboard.domain
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.relational.core.mapping.Column
-import org.springframework.data.relational.core.mapping.Table
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import java.time.LocalDate
 
-@Table("COURSE")
+@Entity
+@Table(name = "COURSE")
 data class Course(
     @Id
-    @Column("CANVAS_ID")
-    val canvasId: Int,
+    @Column(name = "CANVAS_ID")
+    val canvasId: Int = 0,
 
-    @Column("TITLE")
-    val title: String,
+    @Column(name = "TITLE")
+    val title: String = "",
 
-    @Column("COURSE_CODE")
-    val courseCode: String,
+    @Column(name = "COURSE_CODE")
+    val courseCode: String = "",
 
-    @Column("START_DATE")
-    val startDate: LocalDate,
+    @Column(name = "START_DATE")
+    val startDate: LocalDate = LocalDate.MIN,
 
-    @Column("END_DATE")
-    val endDate: LocalDate)
+    @Column(name = "END_DATE")
+    val endDate: LocalDate = LocalDate.MIN
+)
