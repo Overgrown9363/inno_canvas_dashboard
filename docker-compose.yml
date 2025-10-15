@@ -1,0 +1,13 @@
+services:
+  innodb:
+    image: postgres
+    ports:
+      - "15432:5432"
+    environment:
+      - "POSTGRES_USER=postgres"
+      - "POSTGRES_PASSWORD=postgres"
+      - "DB_APP_NAME=inno-dashboard"
+      - "DB_APP_USER=inno-dashboard"
+      - "DB_APP_PASS=inno-dashboard"
+    volumes:
+      - "./development/db:/docker-entrypoint-initdb.d"
