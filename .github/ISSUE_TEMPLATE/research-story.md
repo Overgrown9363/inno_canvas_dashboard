@@ -16,13 +16,13 @@ zodat toepassing.
 
 
 ### Definition of Ready
-- [ ] x
+- x
 
 ### Tasks
 - [ ] x
 
 ### Acceptance Criteria
-- [ ] x
+- x
 
 ### Definition of Done
 - Alle acceptatiecriteria van de user story zijn behaald.
