@@ -11,7 +11,7 @@ import java.io.InputStreamReader
 @Component
 class CsvFileParser : FileParser {
     override fun supports(file: MultipartFile): Boolean {
-        return file.originalFilename?.endsWith(".csv", true) == true
+        return file.originalFilename?.endsWith(suffix = ".csv", ignoreCase = true) == true
     }
 
     override fun parse(file: MultipartFile): List<List<String>> {
