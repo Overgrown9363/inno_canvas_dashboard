@@ -15,6 +15,10 @@ class CsvFileParser : FileParser {
     }
 
     override fun parse(file: MultipartFile): List<List<String>> {
+        if (file.isEmpty) {
+            throw CsvFileCannotBeReadException("File is empty")
+        }
+
         try {
             file.inputStream.use { inputStream ->
                 InputStreamReader(inputStream, Charsets.UTF_8).use { reader ->
