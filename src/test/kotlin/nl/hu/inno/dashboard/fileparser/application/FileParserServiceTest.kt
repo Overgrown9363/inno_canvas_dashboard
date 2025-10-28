@@ -36,10 +36,10 @@ class FileParserServiceTest {
     fun unsupportedFileThrowsException() {
         val file = MockMultipartFile("file", "users-01.txt", "text/plain", "test".toByteArray())
 
-        val exception = assertThrows(FileTypeNotSupportedException::class.java) {
+        val actualException = assertThrows(FileTypeNotSupportedException::class.java) {
             service.parseFile(file)
         }
-        val expectedMessage = "No available parser found"
-        assertTrue(exception.message!!.contains(expectedMessage))
+        val expectedMessage = "No available parser found for file: users-01.txt"
+        assertEquals(expectedMessage, actualException.message)
     }
 }
