@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.mock.web.MockMultipartFile
 
-class FileParserServiceTest {
+class FileParserServiceImplTest {
 
     private val csvParser = CsvFileParser()
-    private val service = FileParserService(listOf(csvParser))
+    private val service = FileParserServiceImpl(listOf(csvParser))
 
     @Test
     fun canParseValidCSV() {
