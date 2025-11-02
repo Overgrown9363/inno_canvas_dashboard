@@ -25,23 +25,46 @@ class DashboardServiceImpl(
     }
 
     override fun parseAndPersistCanvasData(file: MultipartFile) {
-        val rows = fileParserService.parseFile(file)
+        val records = fileParserService.parseFile(file)
 
-        val courseList = rows.map { convertToCourse(it) }.distinct()
-        val userList = rows.map { convertToUser(it) }.distinct()
+        val courseCache = mutableMapOf<Int, Course>()
+        val userCache = mutableMapOf<String, Users>()
+        processRecordsAndBuildCaches(records, courseCache, userCache)
 
-        val newCourses = checkForDuplicateCourses(courseList)
-        val newUsers = checkForDuplicateUsers(userList)
+        courseDB.saveAll(courseCache.values)
+        usersDB.saveAll(userCache.values)
+    }
 
-        courseDB.saveAll(newCourses)
-        usersDB.saveAll(newUsers)
+    private fun processRecordsAndBuildCaches(
+        records: List<List<String>>,
+        courseCache: MutableMap<Int, Course>,
+        userCache: MutableMap<String, Users>
+    ) {
+        for (record in records) {
+            if (record.size != 7) {
+                throw InvalidParseListException("Expected record to have 7 columns, got ${record.size}")
+            }
+
+            val courseId = record[0].toInt()
+            val userEmail = record[5]
+
+            val course = courseCache.getOrPut(courseId) {
+                courseDB.findByIdOrNull(courseId) ?: convertToCourse(record)
+            }
+
+            val user = userCache.getOrPut(userEmail) {
+                usersDB.findByIdOrNull(userEmail) ?: convertToUser(record)
+            }
+
+            val updatedUser = user.copy(courses = user.courses + course)
+            val updatedCourse = course.copy(users = course.users + user)
+
+            userCache[userEmail] = updatedUser
+            courseCache[courseId] = updatedCourse
+        }
     }
 
     private fun convertToUser(columns: List<String>): Users {
-        if (columns.size != 7) {
-            throw InvalidParseListException("Expected record to have 7 columns, got ${columns.size}")
-        }
-
         val name = columns[4]
         val emailAddress = columns[5]
         val role = when (columns[6].uppercase()) {
@@ -59,10 +82,6 @@ class DashboardServiceImpl(
     }
 
     private fun convertToCourse(columns: List<String>): Course {
-        if (columns.size != 7) {
-            throw InvalidParseListException("Expected record to have 7 columns, got ${columns.size}")
-        }
-
         val canvasId = columns[0].toInt()
         val title = columns[1]
         val startDate = LocalDate.parse(columns[2].substring(0, 10))
@@ -74,17 +93,5 @@ class DashboardServiceImpl(
             startDate = startDate,
             endDate = endDate
         )
-    }
-
-    private fun checkForDuplicateCourses(courseList: List<Course>): List<Course> {
-        return courseList.filter { course ->
-            courseDB.findByIdOrNull(course.canvasId) == null
-        }
-    }
-
-    private fun checkForDuplicateUsers(userList: List<Users>): List<Users> {
-        return userList.filter { user ->
-            usersDB.findByIdOrNull(user.emailAddress) == null
-        }
     }
 }
