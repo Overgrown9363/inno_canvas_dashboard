@@ -37,7 +37,7 @@ class DashboardServiceImpl(
     override fun replaceUsersInCourse(file: MultipartFile) {
         val records = fileParserService.parseFile(file)
 
-        val course = retrieveCourseFromRecords(records)
+        val course = retrieveOrCreateCourse(records)
         val userEmailsInFile = records.map { it[5] }.toSet()
         val currentUsers = course.users
 
@@ -50,21 +50,11 @@ class DashboardServiceImpl(
         usersDB.saveAll(updatedUsers)
     }
 
-    private fun updateUsersStillInCourse(
-        userEmailsInFile: Set<String>,
-        records: List<List<String>>
-    ): Set<Users> {
-        val newUsers = userEmailsInFile.map { email ->
-            usersDB.findByIdOrNull(email) ?: convertToUser(records.find { it[5] == email }!!)
-        }.toSet()
-        return newUsers
-    }
-
     private fun updateCourseUserData(
         records: List<List<String>>,
         userCache: MutableMap<String, Users>
     ): Course {
-        var updatedCourse = retrieveCourseFromRecords(records)
+        var updatedCourse = retrieveOrCreateCourse(records)
 
         for (record in records) {
             if (record.size != 7) {
@@ -82,6 +72,16 @@ class DashboardServiceImpl(
         }
 
         return updatedCourse
+    }
+
+    private fun updateUsersStillInCourse(
+        userEmailsInFile: Set<String>,
+        records: List<List<String>>
+    ): Set<Users> {
+        val newUsers = userEmailsInFile.map { email ->
+            usersDB.findByIdOrNull(email) ?: convertToUser(records.find { it[5] == email }!!)
+        }.toSet()
+        return newUsers
     }
 
     private fun updateUsersCourseAssociations(
@@ -129,7 +129,7 @@ class DashboardServiceImpl(
         return Course.of(canvasId, title, startDate, endDate)
     }
 
-    private fun retrieveCourseFromRecords(records: List<List<String>>): Course {
+    private fun retrieveOrCreateCourse(records: List<List<String>>): Course {
         val firstRecord = records[0]
         val courseId = firstRecord[0].toInt()
 
