@@ -27,11 +27,10 @@ class DashboardServiceImpl(
     override fun updateExistingCourseData(file: MultipartFile) {
         val records = fileParserService.parseFile(file)
 
-        val courseCache = mutableMapOf<Int, Course>()
         val userCache = mutableMapOf<String, Users>()
-        processRecordsAndBuildCaches(records, courseCache, userCache)
+        val updatedCourse = updateCourseUserData(records, userCache)
 
-        courseDB.saveAll(courseCache.values)
+        courseDB.save(updatedCourse)
         usersDB.saveAll(userCache.values)
     }
 
@@ -39,33 +38,28 @@ class DashboardServiceImpl(
         TODO("Not yet implemented")
     }
 
-    private fun processRecordsAndBuildCaches(
+    private fun updateCourseUserData(
         records: List<List<String>>,
-        courseCache: MutableMap<Int, Course>,
         userCache: MutableMap<String, Users>
-    ) {
+    ): Course {
+        var updatedCourse = retrieveCourseFromRecords(records)
+
         for (record in records) {
             if (record.size != 7) {
                 throw InvalidParseListException("Expected record to have 7 columns, got ${record.size}")
             }
 
-            val courseId = record[0].toInt()
             val userEmail = record[5]
-
-            val course = courseCache.getOrPut(courseId) {
-                courseDB.findByIdOrNull(courseId) ?: convertToCourse(record)
-            }
-
             val user = userCache.getOrPut(userEmail) {
                 usersDB.findByIdOrNull(userEmail) ?: convertToUser(record)
             }
 
-            val updatedUser = user.copy(courses = user.courses + course)
-            val updatedCourse = course.copy(users = course.users + user)
-
+            val updatedUser = user.copy(courses = user.courses + updatedCourse)
+            updatedCourse = updatedCourse.copy(users = updatedCourse.users + updatedUser)
             userCache[userEmail] = updatedUser
-            courseCache[courseId] = updatedCourse
         }
+
+        return updatedCourse
     }
 
     private fun convertToUser(record: List<String>): Users {
@@ -88,5 +82,12 @@ class DashboardServiceImpl(
         val endDate = LocalDate.parse(record[3].substring(0, 10))
 
         return Course.of(canvasId, title, startDate, endDate)
+    }
+
+    private fun retrieveCourseFromRecords(records: List<List<String>>): Course {
+        val firstRecord = records[0]
+        val courseId = firstRecord[0].toInt()
+
+        return courseDB.findByIdOrNull(courseId) ?: convertToCourse(firstRecord)
     }
 }
