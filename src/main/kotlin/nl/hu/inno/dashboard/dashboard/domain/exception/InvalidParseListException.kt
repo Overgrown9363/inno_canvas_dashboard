@@ -1,4 +1,4 @@
 package nl.hu.inno.dashboard.dashboard.domain.exception
 
-class InvalidParseListException {
+class InvalidParseListException(message: String) : Exception(message) {
 }
