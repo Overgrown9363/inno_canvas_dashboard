@@ -5,5 +5,6 @@ import org.springframework.web.multipart.MultipartFile
 
 interface DashboardService {
     fun findCourseById(id: Int): Course?
-    fun parseAndPersistCanvasData(file: MultipartFile)
+    fun updateExistingCourseData(file: MultipartFile)
+    fun replaceCourseData(file: MultipartFile)
 }

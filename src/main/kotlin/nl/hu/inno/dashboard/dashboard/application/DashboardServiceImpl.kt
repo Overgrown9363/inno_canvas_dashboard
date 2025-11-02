@@ -24,7 +24,7 @@ class DashboardServiceImpl(
         return courseDB.findByIdOrNull(id)
     }
 
-    override fun parseAndPersistCanvasData(file: MultipartFile) {
+    override fun updateExistingCourseData(file: MultipartFile) {
         val records = fileParserService.parseFile(file)
 
         val courseCache = mutableMapOf<Int, Course>()
@@ -33,6 +33,10 @@ class DashboardServiceImpl(
 
         courseDB.saveAll(courseCache.values)
         usersDB.saveAll(userCache.values)
+    }
+
+    override fun replaceCourseData(file: MultipartFile) {
+        TODO("Not yet implemented")
     }
 
     private fun processRecordsAndBuildCaches(
