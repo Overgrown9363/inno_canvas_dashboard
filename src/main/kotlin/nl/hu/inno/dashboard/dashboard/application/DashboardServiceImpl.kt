@@ -74,11 +74,7 @@ class DashboardServiceImpl(
             else -> throw IllegalArgumentException("Invalid role: ${record[6]}")
         }
 
-        return Users(
-            name = name,
-            emailAddress = emailAddress,
-            role = role
-        )
+        return Users.of(emailAddress, name, role)
     }
 
     private fun convertToCourse(record: List<String>): Course {
@@ -87,11 +83,6 @@ class DashboardServiceImpl(
         val startDate = LocalDate.parse(record[2].substring(0, 10))
         val endDate = LocalDate.parse(record[3].substring(0, 10))
 
-        return Course(
-            canvasId = canvasId,
-            title = title,
-            startDate = startDate,
-            endDate = endDate
-        )
+        return Course.of(canvasId, title, startDate, endDate)
     }
 }

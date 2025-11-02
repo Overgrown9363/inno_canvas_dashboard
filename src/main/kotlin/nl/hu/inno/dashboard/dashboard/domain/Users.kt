@@ -31,4 +31,10 @@ data class Users (
         inverseJoinColumns = [JoinColumn(name = "COURSE_CANVAS_ID")]
     )
     val courses: Set<Course> = emptySet()
-)
+) {
+    companion object {
+        fun of(emailAddress: String, name: String, role: Role?, courses: Set<Course> = emptySet()): Users {
+            return Users(emailAddress, name, role, courses)
+        }
+    }
+}

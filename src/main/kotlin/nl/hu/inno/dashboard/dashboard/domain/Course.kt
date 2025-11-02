@@ -25,4 +25,10 @@ data class Course(
 
     @ManyToMany(mappedBy = "courses")
     val users: Set<Users> = emptySet()
-)
+) {
+    companion object {
+        fun of(canvasId: Int, title: String, startDate: LocalDate, endDate: LocalDate, users: Set<Users> = emptySet()): Course {
+            return Course(canvasId, title, startDate, endDate, users)
+        }
+    }
+}
