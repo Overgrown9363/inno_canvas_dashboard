@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
 import nl.hu.inno.dashboard.dashboard.domain.Role
+import nl.hu.inno.dashboard.dashboard.domain.exception.InvalidParseListException
 
 @Service
 class DashboardServiceImpl(
@@ -24,22 +25,21 @@ class DashboardServiceImpl(
     override fun parseAndPersistCanvasData(file: MultipartFile) {
         val rows = fileParserService.parseFile(file)
 
-        rows.forEachIndexed { index, row ->
-            if (row.size != 7) {
-                throw IllegalArgumentException(
-                    "Invalid CSV format on row ${index + 1}: expected 7 columns, found ${row.size}"
-                )
-            }
-        }
+        val courseList = rows.map { convertToCourse(it) }.distinct()
+        val userList = rows.map { convertToUser(it) }.distinct()
 
-        val courseList = rows.map { parseCourseList(it) }
-        val userList = rows.map { parseUserList(it) }
+        val newCourses = checkForDuplicateCourses(courseList)
+        val newUsers = checkForDuplicateUsers(userList)
 
-        courseDB.saveAll(courseList)
-        usersDB.saveAll(userList)
+        courseDB.saveAll(newCourses)
+        usersDB.saveAll(newUsers)
     }
 
-    private fun parseUserList(columns: List<String>): Users {
+    private fun convertToUser(columns: List<String>): Users {
+        if (columns.size != 7) {
+            throw InvalidParseListException("Expected record to have 7 columns, got ${columns.size}")
+        }
+
         val name = columns[4]
         val emailAddress = columns[5]
         val role = when (columns[6].uppercase()) {
@@ -56,7 +56,11 @@ class DashboardServiceImpl(
         )
     }
 
-    private fun parseCourseList(columns: List<String>): Course {
+    private fun convertToCourse(columns: List<String>): Course {
+        if (columns.size != 7) {
+            throw InvalidParseListException("Expected record to have 7 columns, got ${columns.size}")
+        }
+
         val canvasId = columns[0].toInt()
         val title = columns[1]
         val startDate = LocalDate.parse(columns[2].substring(0, 10))
@@ -68,5 +72,17 @@ class DashboardServiceImpl(
             startDate = startDate,
             endDate = endDate
         )
+    }
+
+    private fun checkForDuplicateCourses(courseList: List<Course>): List<Course> {
+        return courseList.filter { course ->
+            courseDB.findByIdOrNull(course.canvasId) == null
+        }
+    }
+
+    private fun checkForDuplicateUsers(userList: List<Users>): List<Users> {
+        return userList.filter { user ->
+            usersDB.findByIdOrNull(user.emailAddress) == null
+        }
     }
 }
