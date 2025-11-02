@@ -84,9 +84,57 @@ class DashboardServiceImplTest {
         )
     }
 
-//TODO    Waiting for completion
-//    @Test
-//    fun replaceCourseData() {
-//    }
+    @Test
+    fun replaceUsersInCourseTest() {
+        val mockFile = MockMultipartFile(
+            "file",
+            "test.csv",
+            "text/csv",
+            ByteArray(0)
+        )
+
+        val course = Course(
+            canvasId = 50304,
+            title = "Innovation Semester - September 2025",
+            startDate = LocalDate.parse("2025-09-01"),
+            endDate = LocalDate.parse("2026-01-30"),
+            users = emptySet()
+        )
+
+        val parsedRecords = listOf(
+            listOf(
+                "50304", "Innovation Semester - September 2025",
+                "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00",
+                "John Doe", "john.doe@student.hu.nl", "STUDENT"
+            ),
+            listOf(
+                "50304", "Innovation Semester - September 2025",
+                "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00",
+                "Jane Doe", "jane.doe@hu.nl", "TEACHER"
+            )
+        )
+
+        `when`(fileParserService.parseFile(mockFile)).thenReturn(parsedRecords)
+        `when`(courseDB.findById(50304)).thenReturn(Optional.of(course))
+        `when`(courseDB.save(any(Course::class.java))).thenAnswer { it.getArgument(0) }
+
+        Mockito.doAnswer { invocation ->
+            val users = invocation.getArgument<Iterable<Users>>(0)
+            users
+        }.`when`(usersDB).saveAll(anyList())
+
+        // Act
+        service.replaceUsersInCourse(mockFile)
+
+        // Assert
+        verify(fileParserService, times(1)).parseFile(mockFile)
+        verify(courseDB, times(1)).save(argThat { it.users.size == 2 })
+        verify(usersDB, times(1)).saveAll(
+            argThat { users: Iterable<Users> ->
+                users.any { it.emailAddress == "john.doe@student.hu.nl" && it.role == Role.STUDENT } &&
+                        users.any { it.emailAddress == "jane.doe@hu.nl" && it.role == Role.TEACHER }
+            }
+        )
+    }
 
 }
