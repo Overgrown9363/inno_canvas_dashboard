@@ -11,8 +11,10 @@ import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
 import nl.hu.inno.dashboard.dashboard.domain.Role
 import nl.hu.inno.dashboard.dashboard.domain.exception.InvalidParseListException
+import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional
 class DashboardServiceImpl(
     private val courseDB: CourseRepository,
     private val usersDB: UsersRepository,
