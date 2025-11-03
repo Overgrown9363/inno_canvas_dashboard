@@ -123,10 +123,8 @@ class DashboardServiceImplTest {
             users
         }.`when`(usersDB).saveAll(anyList())
 
-        // Act
         service.replaceUsersInCourse(mockFile)
 
-        // Assert
         verify(fileParserService, times(1)).parseFile(mockFile)
         verify(courseDB, times(1)).save(argThat { it.users.size == 2 })
         verify(usersDB, times(1)).saveAll(
