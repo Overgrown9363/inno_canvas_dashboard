@@ -17,9 +17,6 @@ data class Course(
     @Column(name = "TITLE")
     val title: String = "",
 
-    @Column(name = "COURSE_CODE")
-    val courseCode: String = "",
-
     @Column(name = "START_DATE")
     val startDate: LocalDate = LocalDate.MIN,
 
@@ -28,4 +25,10 @@ data class Course(
 
     @ManyToMany(mappedBy = "courses")
     val users: Set<Users> = emptySet()
-)
+) {
+    companion object {
+        fun of(canvasId: Int, title: String, startDate: LocalDate, endDate: LocalDate, users: Set<Users> = emptySet()): Course {
+            return Course(canvasId, title, startDate, endDate, users)
+        }
+    }
+}
