@@ -26,8 +26,6 @@ class DashboardController(
             service.addUsersToCourse()
             ResponseEntity.ok().build()
         } catch (e: Exception) {
-            println("exception occurred for /add; " + e.message)
-            e.printStackTrace()
             ResponseEntity.internalServerError().build()
         }
     }
@@ -38,8 +36,6 @@ class DashboardController(
             service.updateUsersInCourse()
             ResponseEntity.ok().build()
         } catch (e: Exception) {
-            println("exception occurred for /update; "  + e.message)
-            e.printStackTrace()
             ResponseEntity.internalServerError().build()
         }
     }

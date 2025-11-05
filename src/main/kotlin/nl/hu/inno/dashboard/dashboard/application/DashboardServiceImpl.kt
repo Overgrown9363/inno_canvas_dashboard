@@ -19,20 +19,15 @@ class DashboardServiceImpl(
     private val usersDB: UsersRepository,
     private val fileParserService: FileParserService,
     private val fileFetcherService: FileFetcherService,
-    parserService: FileParserService
 ) : DashboardService {
     override fun findCourseById(id: Int): Course? {
         return courseDB.findByIdOrNull(id)
     }
 
     override fun addUsersToCourse() {
-        // call to new integration component to fetch csv file
         val resource = fileFetcherService.fetchCsvFile()
-
-        // call to fileParserService to read MultiPartFile and return List<List<String>> data
         val records = fileParserService.parseFile(resource)
 
-        // add associations between users and course (only add users/courses here)
         val courseCache = mutableMapOf<Int, Course>()
         val usersCache = mutableMapOf<String, Users>()
 
@@ -53,7 +48,6 @@ class DashboardServiceImpl(
             user.courses.add(course)
         }
 
-        // persist courses, users and their associations in the database
         courseDB.saveAll(courseCache.values)
         usersDB.saveAll(usersCache.values)
     }
