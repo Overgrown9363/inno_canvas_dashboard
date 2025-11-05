@@ -7,6 +7,6 @@ import org.springframework.stereotype.Service
 @Service
 class FileFetcherServiceImpl : FileFetcherService {
     override fun fetchCsvFile(): Resource {
-        return ClassPathResource("a.csv")
+        return ClassPathResource("users-01.csv")
     }
 }
