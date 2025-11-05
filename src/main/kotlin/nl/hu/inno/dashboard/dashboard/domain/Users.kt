@@ -1,5 +1,6 @@
 package nl.hu.inno.dashboard.dashboard.domain
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -12,7 +13,7 @@ import jakarta.persistence.ManyToMany
 
 @Entity
 @Table(name = "USERS")
-data class Users (
+class Users (
     @Id
     @Column(name = "EMAIL_ADDRESS")
     val emailAddress: String = "",
@@ -24,7 +25,7 @@ data class Users (
     @Column(name = "ROLE")
     val role: Role? = null,
 
-    @ManyToMany
+    @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinTable(
         name = "USER_COURSE",
         joinColumns = [JoinColumn(name = "USER_EMAIL")],
@@ -37,4 +38,9 @@ data class Users (
             return Users(emailAddress, name, role, courses)
         }
     }
+
+    override fun equals(other: Any?): Boolean =
+        this === other || (other is Users && emailAddress == other.emailAddress)
+
+    override fun hashCode(): Int = emailAddress.hashCode()
 }
