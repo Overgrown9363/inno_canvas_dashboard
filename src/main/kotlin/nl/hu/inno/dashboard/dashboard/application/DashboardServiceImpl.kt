@@ -41,7 +41,7 @@ class DashboardServiceImpl(
         for (record in records) {
             val courseId = record[0].toInt()
             val email = record[5]
-            if (email.isBlank() || email == "null") continue
+            if (email.isBlank() || email.lowercase() == "null") continue
 
             val course = courseCache.getOrPut(courseId) {
                 courseDB.findByIdOrNull(courseId) ?: convertToCourse(record)
