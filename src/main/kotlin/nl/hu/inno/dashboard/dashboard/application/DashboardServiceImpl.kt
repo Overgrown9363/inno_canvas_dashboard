@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
 import nl.hu.inno.dashboard.dashboard.domain.Role
 import nl.hu.inno.dashboard.dashboard.domain.exception.InvalidParseListException
+import nl.hu.inno.dashboard.filefetcher.application.FileFetcherService
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -18,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional
 class DashboardServiceImpl(
     private val courseDB: CourseRepository,
     private val usersDB: UsersRepository,
-    private val fileParserService: FileParserService
+    private val fileParserService: FileParserService,
+    private val fileFetcherService: FileFetcherService,
+    parserService: FileParserService
 ) : DashboardService {
     override fun findCourseById(id: Int): Course? {
         return courseDB.findByIdOrNull(id)
@@ -26,12 +29,35 @@ class DashboardServiceImpl(
 
     override fun addUsersToCourse() {
         // call to new integration component to fetch csv file
+        val resource = fileFetcherService.fetchCsvFile()
 
         // call to fileParserService to read MultiPartFile and return List<List<String>> data
+        val records = fileParserService.parseFile(resource)
 
         // add associations between users and course (only add users/courses here)
+        val courseCache = mutableMapOf<Int, Course>()
+        val usersCache = mutableMapOf<String, Users>()
+
+        for (record in records) {
+            val courseId = record[0].toInt()
+            val email = record[5]
+            if (email.isBlank() || email == "null") continue
+
+            val course = courseCache.getOrPut(courseId) {
+                courseDB.findByIdOrNull(courseId) ?: convertToCourse(record)
+            }
+
+            val user = usersCache.getOrPut(email) {
+                usersDB.findByIdOrNull(email) ?: convertToUser(record)
+            }
+
+            course.users.add(user)
+            user.courses.add(course)
+        }
 
         // persist courses, users and their associations in the database
+        courseDB.saveAll(courseCache.values)
+        usersDB.saveAll(usersCache.values)
     }
 
     override fun updateUsersInCourse() {
