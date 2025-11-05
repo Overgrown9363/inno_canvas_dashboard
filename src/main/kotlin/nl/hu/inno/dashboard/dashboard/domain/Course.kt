@@ -24,10 +24,10 @@ data class Course(
     val endDate: LocalDate = LocalDate.MIN,
 
     @ManyToMany(mappedBy = "courses")
-    val users: Set<Users> = emptySet()
+    val users: MutableSet<Users> = mutableSetOf()
 ) {
     companion object {
-        fun of(canvasId: Int, title: String, startDate: LocalDate, endDate: LocalDate, users: Set<Users> = emptySet()): Course {
+        fun of(canvasId: Int, title: String, startDate: LocalDate, endDate: LocalDate, users: MutableSet<Users> = mutableSetOf()): Course {
             return Course(canvasId, title, startDate, endDate, users)
         }
     }

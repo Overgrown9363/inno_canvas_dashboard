@@ -30,10 +30,10 @@ data class Users (
         joinColumns = [JoinColumn(name = "USER_EMAIL")],
         inverseJoinColumns = [JoinColumn(name = "COURSE_CANVAS_ID")]
     )
-    val courses: Set<Course> = emptySet()
+    val courses: MutableSet<Course> = mutableSetOf()
 ) {
     companion object {
-        fun of(emailAddress: String, name: String, role: Role?, courses: Set<Course> = emptySet()): Users {
+        fun of(emailAddress: String, name: String, role: Role?, courses: MutableSet<Course> = mutableSetOf()): Users {
             return Users(emailAddress, name, role, courses)
         }
     }
