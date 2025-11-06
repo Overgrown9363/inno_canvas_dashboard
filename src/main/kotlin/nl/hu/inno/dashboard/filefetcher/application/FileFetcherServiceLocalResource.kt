@@ -5,7 +5,7 @@ import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 
 @Service
-class FileFetcherServiceImpl : FileFetcherService {
+class FileFetcherServiceLocalResource : FileFetcherService {
     override fun fetchCsvFile(): Resource {
         return ClassPathResource("users-01.csv")
     }
