@@ -54,8 +54,8 @@ class DashboardServiceImpl(
         usersCache: MutableMap<String, Users>
     ) {
         for (record in records) {
-            val canvasCourseId = record[CsvHeaders.CANVAS_COURSE_ID].toInt()
-            val email = record[CsvHeaders.USER_EMAIL]
+            val canvasCourseId = record[CsvColumns.CANVAS_COURSE_ID].toInt()
+            val email = record[CsvColumns.USER_EMAIL]
             if (email.isBlank() || email.lowercase() == "null") continue
 
             val course = courseCache.getOrPut(canvasCourseId) {
@@ -72,19 +72,19 @@ class DashboardServiceImpl(
     }
 
     private fun convertToCourse(record: List<String>): Course {
-        val canvasCourseId = record[CsvHeaders.CANVAS_COURSE_ID].toInt()
-        val courseName = record[CsvHeaders.COURSE_NAME]
-        val instanceName = record[CsvHeaders.INSTANCE_NAME]
-        val startDate = LocalDate.parse(record[CsvHeaders.START_DATE].substring(0, 10))
-        val endDate = LocalDate.parse(record[CsvHeaders.END_DATE].substring(0, 10))
+        val canvasCourseId = record[CsvColumns.CANVAS_COURSE_ID].toInt()
+        val courseName = record[CsvColumns.COURSE_NAME]
+        val instanceName = record[CsvColumns.INSTANCE_NAME]
+        val startDate = LocalDate.parse(record[CsvColumns.START_DATE].substring(0, 10))
+        val endDate = LocalDate.parse(record[CsvColumns.END_DATE].substring(0, 10))
 
         return Course.of(canvasCourseId, courseName, instanceName, startDate, endDate)
     }
 
     private fun convertToUser(record: List<String>): Users {
-        val name = record[CsvHeaders.USER_NAME]
-        val email = record[CsvHeaders.USER_EMAIL]
-        val role = when (record[CsvHeaders.USER_ROLE].uppercase()) {
+        val name = record[CsvColumns.USER_NAME]
+        val email = record[CsvColumns.USER_EMAIL]
+        val role = when (record[CsvColumns.USER_ROLE].uppercase()) {
             "STUDENT" -> Role.STUDENT
             "TEACHER" -> Role.TEACHER
             "ADMIN" -> Role.ADMIN
@@ -94,7 +94,7 @@ class DashboardServiceImpl(
         return Users.of(email, name, role)
     }
 
-    private object CsvHeaders {
+    private object CsvColumns {
         const val CANVAS_COURSE_ID = 0
         const val COURSE_NAME = 1
         const val INSTANCE_NAME = 2
