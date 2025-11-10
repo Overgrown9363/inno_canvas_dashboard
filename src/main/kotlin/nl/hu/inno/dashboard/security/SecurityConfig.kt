@@ -16,6 +16,7 @@ class SecurityConfig {
                     .anyRequest().permitAll()
 //                    .anyRequest().authenticated()
             }
+            .oauth2Login { }
             .oauth2ResourceServer { resourceServer ->
                 resourceServer.jwt { }
             }
