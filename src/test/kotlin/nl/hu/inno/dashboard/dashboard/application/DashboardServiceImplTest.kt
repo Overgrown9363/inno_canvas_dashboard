@@ -37,23 +37,23 @@ class DashboardServiceImplTest {
         fileFetcherService = mock()
         service = DashboardServiceImpl(courseDB, usersDB, fileParserService, fileFetcherService)
 
-        course50304 = Course.of(50304, "Innovation Semester - September 2025", LocalDate.parse("2025-09-01"), LocalDate.parse("2026-01-30"))
-        course9999 = Course.of(9999, "Test cursus - September 2010", LocalDate.parse("2010-09-01"), LocalDate.parse("2011-01-30"))
+        course50304 = Course.of(50304, "Innovation Semester - September 2025", "TICT-V3SE6-25_SEP25", LocalDate.parse("2025-09-01"), LocalDate.parse("2026-01-30"))
+        course9999 = Course.of(9999, "Test cursus - September 2010", "TEST-9999_SEP25", LocalDate.parse("2010-09-01"), LocalDate.parse("2011-01-30"))
         parsedRecords = listOf(
             listOf(
-                "50304", "Innovation Semester - September 2025", "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00", "John Doe", "john.doe@student.hu.nl", "STUDENT"
+                "50304", "Innovation Semester - September 2025", "TICT-V3SE6-25_SEP25", "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00", "John Doe", "john.doe@student.hu.nl", "STUDENT"
             ),
             listOf(
-                "9999", "Test cursus - September 2010", "2010-09-01 00:00:00+02:00", "2011-01-30 23:59:59+01:00", "John Doe", "john.doe@student.hu.nl", "STUDENT"
+                "9999", "Test cursus - September 2010", "TEST-9999_SEP25", "2010-09-01 00:00:00+02:00", "2011-01-30 23:59:59+01:00", "John Doe", "john.doe@student.hu.nl", "STUDENT"
             ),
             listOf(
-                "50304", "Innovation Semester - September 2025", "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00", "Jane Doe", "jane.doe@hu.nl", "TEACHER"
+                "50304", "Innovation Semester - September 2025", "TICT-V3SE6-25_SEP25", "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00", "Jane Doe", "jane.doe@hu.nl", "TEACHER"
             ),
             listOf(
-                "50304", "Innovation Semester - September 2025", "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00", "User Null", "null", "STUDENT"
+                "50304", "Innovation Semester - September 2025", "TICT-V3SE6-25_SEP25", "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00", "User Null", "null", "STUDENT"
             ),
             listOf(
-                "9999", "Test cursus - September 2010", "2010-09-01 00:00:00+02:00", "2011-01-30 23:59:59+01:00", "Test User", "test.user@student.hu.nl", "STUDENT"
+                "9999", "Test cursus - September 2010", "TEST-9999_SEP25", "2010-09-01 00:00:00+02:00", "2011-01-30 23:59:59+01:00", "Test User", "test.user@student.hu.nl", "STUDENT"
             )
         )
 
