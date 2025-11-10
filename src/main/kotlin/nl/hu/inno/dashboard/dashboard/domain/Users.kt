@@ -6,8 +6,8 @@ import jakarta.persistence.*
 @Table(name = "USERS")
 class Users (
     @Id
-    @Column(name = "EMAIL_ADDRESS")
-    val emailAddress: String = "",
+    @Column(name = "EMAIL")
+    val email: String = "",
 
     @Column(name = "NAME")
     val name: String = "",
@@ -20,7 +20,7 @@ class Users (
     @JoinTable(
         name = "USER_COURSE",
         joinColumns = [JoinColumn(name = "USER_EMAIL")],
-        inverseJoinColumns = [JoinColumn(name = "COURSE_CANVAS_ID")]
+        inverseJoinColumns = [JoinColumn(name = "CANVAS_COURSE_ID")]
     )
     val courses: MutableSet<Course> = mutableSetOf()
 ) {
@@ -31,7 +31,7 @@ class Users (
     }
 
     override fun equals(other: Any?): Boolean =
-        this === other || (other is Users && emailAddress == other.emailAddress)
+        this === other || (other is Users && email == other.email)
 
-    override fun hashCode(): Int = emailAddress.hashCode()
+    override fun hashCode(): Int = email.hashCode()
 }

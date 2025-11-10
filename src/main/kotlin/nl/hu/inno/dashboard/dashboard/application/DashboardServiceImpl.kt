@@ -54,12 +54,12 @@ class DashboardServiceImpl(
         usersCache: MutableMap<String, Users>
     ) {
         for (record in records) {
-            val courseId = record[0].toInt()
-            val email = record[5]
+            val canvasCourseId = record[CsvHeaders.CANVAS_COURSE_ID].toInt()
+            val email = record[CsvHeaders.USER_EMAIL]
             if (email.isBlank() || email.lowercase() == "null") continue
 
-            val course = courseCache.getOrPut(courseId) {
-                courseDB.findByIdOrNull(courseId) ?: convertToCourse(record)
+            val course = courseCache.getOrPut(canvasCourseId) {
+                courseDB.findByIdOrNull(canvasCourseId) ?: convertToCourse(record)
             }
 
             val user = usersCache.getOrPut(email) {
@@ -72,18 +72,19 @@ class DashboardServiceImpl(
     }
 
     private fun convertToCourse(record: List<String>): Course {
-        val canvasId = record[0].toInt()
-        val title = record[1]
-        val startDate = LocalDate.parse(record[2].substring(0, 10))
-        val endDate = LocalDate.parse(record[3].substring(0, 10))
+        val canvasCourseId = record[CsvHeaders.CANVAS_COURSE_ID].toInt()
+        val courseName = record[CsvHeaders.COURSE_NAME]
+        val instanceName = record[CsvHeaders.INSTANCE_NAME]
+        val startDate = LocalDate.parse(record[CsvHeaders.START_DATE].substring(0, 10))
+        val endDate = LocalDate.parse(record[CsvHeaders.END_DATE].substring(0, 10))
 
-        return Course.of(canvasId, title, startDate, endDate)
+        return Course.of(canvasCourseId, courseName, instanceName, startDate, endDate)
     }
 
     private fun convertToUser(record: List<String>): Users {
-        val name = record[4]
-        val emailAddress = record[5]
-        val role = when (record[6].uppercase()) {
+        val name = record[CsvHeaders.USER_NAME]
+        val emailAddress = record[CsvHeaders.USER_EMAIL]
+        val role = when (record[CsvHeaders.USER_ROLE].uppercase()) {
             "STUDENT" -> Role.STUDENT
             "TEACHER" -> Role.TEACHER
             "ADMIN" -> Role.ADMIN
