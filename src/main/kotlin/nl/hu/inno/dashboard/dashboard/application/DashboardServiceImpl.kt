@@ -83,7 +83,7 @@ class DashboardServiceImpl(
 
     private fun convertToUser(record: List<String>): Users {
         val name = record[CsvHeaders.USER_NAME]
-        val emailAddress = record[CsvHeaders.USER_EMAIL]
+        val email = record[CsvHeaders.USER_EMAIL]
         val role = when (record[CsvHeaders.USER_ROLE].uppercase()) {
             "STUDENT" -> Role.STUDENT
             "TEACHER" -> Role.TEACHER
@@ -91,7 +91,7 @@ class DashboardServiceImpl(
             else -> throw IllegalArgumentException("Invalid role: ${record[6]}")
         }
 
-        return Users.of(emailAddress, name, role)
+        return Users.of(email, name, role)
     }
 
     private object CsvHeaders {

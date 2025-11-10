@@ -25,8 +25,8 @@ class Users (
     val courses: MutableSet<Course> = mutableSetOf()
 ) {
     companion object {
-        fun of(emailAddress: String, name: String, role: Role?, courses: MutableSet<Course> = mutableSetOf()): Users {
-            return Users(emailAddress, name, role, courses)
+        fun of(email: String, name: String, role: Role?, courses: MutableSet<Course> = mutableSetOf()): Users {
+            return Users(email, name, role, courses)
         }
     }
 
