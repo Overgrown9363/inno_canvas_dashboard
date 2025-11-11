@@ -27,6 +27,7 @@ const CardGrid = () => {
               <h3>{item.title}</h3>
               <p>Start datum: {item.date}</p>
               <p>Laatste update: {item.last_update}</p>
+              <p>Cursus Code: {item.course_code}</p>
             </div>
           </a>
         ))}
@@ -42,6 +43,7 @@ const CardGrid = () => {
               <h3>{item.title}</h3>
               <p>Start datum: {item.date}</p>
               <p>Laatste update: {item.last_update}</p>
+              <p>Cursus Code: {item.course_code}</p>
             </div>
           </a>
         ))}
