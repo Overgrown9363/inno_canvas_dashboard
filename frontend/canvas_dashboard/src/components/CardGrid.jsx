@@ -1,8 +1,19 @@
+import React, { useState, useEffect } from "react";
 import { data } from "../api/tempHardCodedDataCourses.js";
+import CardGridSkeleton from "./CardGridSkeleton";
 import "../css/card-grid.css";
 
 //TODO fetch actual data based on logged in user
 const CardGrid = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <CardGridSkeleton />;
+
   const semesterStartDate = new Date("2025-09-01");
   const semesterEndDate = new Date("2025-12-31");
 
@@ -22,8 +33,8 @@ const CardGrid = () => {
       {/* Active cards */}
       <div className="grid-container">
         {activeCards.map((item, index) => (
-          <a href="">
-            <div key={index} className="card">
+          <a href="#" key={index} className="card-link">
+            <div className="card">
               <h3>{item.title}</h3>
               <p>Start datum: {item.date}</p>
               <p>Laatste update: {item.last_update}</p>
@@ -35,11 +46,11 @@ const CardGrid = () => {
 
       {nonActiveCards.length > 0 && <hr className="separator-line" />}
 
-      {/* Non active cards */}
+      {/* Non-active cards */}
       <div className="grid-container">
         {nonActiveCards.map((item, index) => (
-          <a href="">
-            <div key={index} className="card outdated">
+          <a href="#" key={index} className="card-link">
+            <div className="card outdated">
               <h3>{item.title}</h3>
               <p>Start datum: {item.date}</p>
               <p>Laatste update: {item.last_update}</p>
