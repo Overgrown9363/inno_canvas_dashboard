@@ -21,7 +21,7 @@ class SecurityConfig {
                 resourceServer.jwt { }
             }
             .csrf { csrf -> csrf.disable() }
-            .headers { headers -> headers.frameOptions().disable() }
+            .headers { headers -> headers.frameOptions { it.disable() }}
         return http.build()
     }
 }
