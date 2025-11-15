@@ -35,11 +35,14 @@ jobs:
       - name: Build backend JAR
         run: ./gradlew bootJar
 
+        # ---- FRONTEND ----
+      - name: Install frontend dependencies
+        working-directory: frontend/canvas_dashboard
+        run: npm ci
+
       - name: Build frontend
         working-directory: frontend/canvas_dashboard
-        run: |
-          npm install
-          npm run build
+        run: npm run build
 
       - name: Build and start containers
         run: |
