@@ -3,18 +3,18 @@ package nl.hu.inno.dashboard.dashboard.application
 import nl.hu.inno.dashboard.dashboard.data.CourseRepository
 import nl.hu.inno.dashboard.dashboard.data.UsersRepository
 import nl.hu.inno.dashboard.dashboard.domain.Course
+import nl.hu.inno.dashboard.dashboard.domain.Role
 import nl.hu.inno.dashboard.dashboard.domain.Users
 import nl.hu.inno.dashboard.filefetcher.application.FileFetcherService
 import nl.hu.inno.dashboard.fileparser.application.FileParserService
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 import org.mockito.ArgumentMatchers.anyList
 import org.mockito.ArgumentMatchers.argThat
 import org.mockito.Mockito.*
 import org.springframework.core.io.ByteArrayResource
 import java.time.LocalDate
 import java.util.*
+import kotlin.test.assertEquals
 
 class DashboardServiceImplTest {
     private lateinit var courseDB: CourseRepository
@@ -63,6 +63,30 @@ class DashboardServiceImplTest {
         `when`(courseDB.findById(9999)).thenReturn(Optional.of(course9999))
         `when`(courseDB.saveAll(anyList())).thenAnswer { it.getArgument(0) }
         `when`(usersDB.saveAll(anyList())).thenAnswer { it.getArgument(0) }
+    }
+
+    @Test
+    fun findUserById_returnsUsersDTO_whenUserExists() {
+        val user = Users.of("john.doe@student.hu.nl", "John Doe", Role.STUDENT)
+
+        `when`(usersDB.findById("john.doe@student.hu.nl")).thenReturn(Optional.of(user))
+        val result = service.findUserById("john.doe@student.hu.nl")
+
+        assertNotNull(result)
+        val expectedEmail = "john.doe@student.hu.nl"
+        val expectedName = "John Doe"
+        val expectedRole = "STUDENT"
+        assertEquals(expectedEmail, result.email)
+        assertEquals(expectedName, result.name)
+        assertEquals(expectedRole, result.role)
+    }
+
+    @Test
+    fun findUserById_returnsNull_whenUserDoesNotExist() {
+        `when`(usersDB.findById("not.exists@hu.nl")).thenReturn(Optional.empty())
+        val result = service.findUserById("not.exists@hu.nl")
+
+        assertNull(result)
     }
 
     @Test
