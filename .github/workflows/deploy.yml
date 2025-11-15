@@ -28,8 +28,12 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Build backend
-        run: ./gradlew build
+        # ---- BACKEND ----
+      - name: Run backend tests
+        run: ./gradlew test
+
+      - name: Build backend JAR
+        run: ./gradlew bootJar
 
       - name: Build frontend
         working-directory: frontend/canvas_dashboard
