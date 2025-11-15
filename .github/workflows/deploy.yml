@@ -20,7 +20,7 @@ jobs:
 
         # ---- SETUP LOWERCASE OWNER ----
       - name: Get lowercase repository owner
-        run: echo "REPO_OWNER_LOWERCASE=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+        run: echo "REPO_OWNER_LOWERCASE=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
         # ---- CACHING FRONTEND ----
       - name: Cache node modules
@@ -100,7 +100,7 @@ jobs:
     steps:
         # ---- SETUP LOWERCASE OWNER ----
       - name: Get lowercase repository owner
-        run: echo "REPO_OWNER_LOWERCASE=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+        run: echo "REPO_OWNER_LOWERCASE=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
         # ---- LOGIN TO GHCR ----
       - name: Log in to GitHub Container Registry
