@@ -14,7 +14,7 @@ class Users (
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE")
-    val role: Role? = null,
+    val role: Role = Role.STUDENT,
 
     @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     @JoinTable(
@@ -25,7 +25,7 @@ class Users (
     val courses: MutableSet<Course> = mutableSetOf()
 ) {
     companion object {
-        fun of(email: String, name: String, role: Role?, courses: MutableSet<Course> = mutableSetOf()): Users {
+        fun of(email: String, name: String, role: Role = Role.STUDENT, courses: MutableSet<Course> = mutableSetOf()): Users {
             return Users(email, name, role, courses)
         }
     }
