@@ -1,7 +1,7 @@
 package nl.hu.inno.dashboard.dashboard.presentation
 
 import nl.hu.inno.dashboard.dashboard.application.DashboardServiceImpl
-import nl.hu.inno.dashboard.dashboard.domain.Course
+import nl.hu.inno.dashboard.dashboard.application.dto.UsersDTO
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -20,8 +20,8 @@ class DashboardController(
             ResponseEntity.notFound().build()
     }
 
-    @PostMapping("/add")
-    fun addCourse(): ResponseEntity<Void> {
+    @PostMapping("/internal/users/new")
+    fun addUsersAndCourses(): ResponseEntity<Void> {
         return try {
             service.addUsersToCourse()
             ResponseEntity.ok().build()
@@ -30,8 +30,8 @@ class DashboardController(
         }
     }
 
-    @PostMapping("/update")
-    fun updateCourse(): ResponseEntity<Void> {
+    @PostMapping("/internal/users/update")
+    fun updateUsersAndCourses(): ResponseEntity<Void> {
         return try {
             service.updateUsersInCourse()
             ResponseEntity.ok().build()
