@@ -11,11 +11,11 @@ class DashboardController(
     private val service: DashboardServiceImpl
     ) {
 
-    @GetMapping("/{id}")
-    fun getMessage(@PathVariable id: Int): ResponseEntity<Course> {
-        val course = service.findCourseById(id)
-        return if (course != null) {
-            ResponseEntity.ok(course)
+    @GetMapping("/users/{email}")
+    fun getUserByEmail(@PathVariable email: String): ResponseEntity<UsersDTO> {
+        val userDTO = service.findUserById(email)
+        return if (userDTO != null) {
+            ResponseEntity.ok(userDTO)
         } else
             ResponseEntity.notFound().build()
     }
