@@ -37,23 +37,23 @@ class DashboardServiceImplTest {
         fileFetcherService = mock()
         service = DashboardServiceImpl(courseDB, usersDB, fileParserService, fileFetcherService)
 
-        course50304 = Course.of(50304, "Innovation Semester - September 2025", LocalDate.parse("2025-09-01"), LocalDate.parse("2026-01-30"))
-        course9999 = Course.of(9999, "Test cursus - September 2010", LocalDate.parse("2010-09-01"), LocalDate.parse("2011-01-30"))
+        course50304 = Course.of(50304, "Innovation Semester - September 2025", "TICT-V3SE6-25_SEP25", LocalDate.parse("2025-09-01"), LocalDate.parse("2026-01-30"))
+        course9999 = Course.of(9999, "Test cursus - September 2010", "TEST-9999_SEP25", LocalDate.parse("2010-09-01"), LocalDate.parse("2011-01-30"))
         parsedRecords = listOf(
             listOf(
-                "50304", "Innovation Semester - September 2025", "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00", "John Doe", "john.doe@student.hu.nl", "STUDENT"
+                "50304", "Innovation Semester - September 2025", "TICT-V3SE6-25_SEP25", "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00", "John Doe", "john.doe@student.hu.nl", "STUDENT"
             ),
             listOf(
-                "9999", "Test cursus - September 2010", "2010-09-01 00:00:00+02:00", "2011-01-30 23:59:59+01:00", "John Doe", "john.doe@student.hu.nl", "STUDENT"
+                "9999", "Test cursus - September 2010", "TEST-9999_SEP25", "2010-09-01 00:00:00+02:00", "2011-01-30 23:59:59+01:00", "John Doe", "john.doe@student.hu.nl", "STUDENT"
             ),
             listOf(
-                "50304", "Innovation Semester - September 2025", "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00", "Jane Doe", "jane.doe@hu.nl", "TEACHER"
+                "50304", "Innovation Semester - September 2025", "TICT-V3SE6-25_SEP25", "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00", "Jane Doe", "jane.doe@hu.nl", "TEACHER"
             ),
             listOf(
-                "50304", "Innovation Semester - September 2025", "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00", "User Null", "null", "STUDENT"
+                "50304", "Innovation Semester - September 2025", "TICT-V3SE6-25_SEP25", "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00", "User Null", "null", "STUDENT"
             ),
             listOf(
-                "9999", "Test cursus - September 2010", "2010-09-01 00:00:00+02:00", "2011-01-30 23:59:59+01:00", "Test User", "test.user@student.hu.nl", "STUDENT"
+                "9999", "Test cursus - September 2010", "TEST-9999_SEP25", "2010-09-01 00:00:00+02:00", "2011-01-30 23:59:59+01:00", "Test User", "test.user@student.hu.nl", "STUDENT"
             )
         )
 
@@ -70,8 +70,8 @@ class DashboardServiceImplTest {
         service.addUsersToCourse()
 
         verify(courseDB).saveAll(argThat { courses: Collection<Course> ->
-            courses.count { it.canvasId == 50304 } == 1 &&
-                    courses.count { it.canvasId == 9999 } == 1
+            courses.count { it.canvasCourseId == 50304 } == 1 &&
+                    courses.count { it.canvasCourseId == 9999 } == 1
         })
     }
 
@@ -80,9 +80,9 @@ class DashboardServiceImplTest {
         service.addUsersToCourse()
 
         verify(usersDB).saveAll(argThat { users: Collection<Users> ->
-            users.count { it.emailAddress == "john.doe@student.hu.nl"} == 1 &&
-                    users.count { it.emailAddress == "jane.doe@hu.nl"} == 1 &&
-                    users.count { it.emailAddress == "test.user@student.hu.nl"} == 1
+            users.count { it.email == "john.doe@student.hu.nl"} == 1 &&
+                    users.count { it.email == "jane.doe@hu.nl"} == 1 &&
+                    users.count { it.email == "test.user@student.hu.nl"} == 1
         })
     }
 
@@ -91,13 +91,13 @@ class DashboardServiceImplTest {
         service.addUsersToCourse()
 
         verify(usersDB).saveAll(argThat { users: Collection<Users> ->
-            val userJohn = users.find { it.emailAddress == "john.doe@student.hu.nl"}
-            val userJane = users.find { it.emailAddress == "jane.doe@hu.nl"}
-            val userTest = users.find { it.emailAddress == "test.user@student.hu.nl" }
+            val userJohn = users.find { it.email == "john.doe@student.hu.nl"}
+            val userJane = users.find { it.email == "jane.doe@hu.nl"}
+            val userTest = users.find { it.email == "test.user@student.hu.nl" }
             userJohn != null && userJane != null && userTest != null &&
-                    userJohn.courses.map { it.canvasId }.toSet() == setOf(50304, 9999) &&
-                    userJane.courses.map { it.canvasId }.toSet() == setOf(50304) &&
-                    userTest.courses.map { it.canvasId }.toSet() == setOf(9999)
+                    userJohn.courses.map { it.canvasCourseId }.toSet() == setOf(50304, 9999) &&
+                    userJane.courses.map { it.canvasCourseId }.toSet() == setOf(50304) &&
+                    userTest.courses.map { it.canvasCourseId }.toSet() == setOf(9999)
         })
     }
 
@@ -106,11 +106,11 @@ class DashboardServiceImplTest {
         service.addUsersToCourse()
 
         verify(courseDB).saveAll(argThat { courses: Collection<Course> ->
-            val course1 = courses.find { it.canvasId == 50304 }
-            val course2 = courses.find { it.canvasId == 9999 }
+            val course1 = courses.find { it.canvasCourseId == 50304 }
+            val course2 = courses.find { it.canvasCourseId == 9999 }
             course1 != null && course2 != null &&
-                    course1.users.map { it.emailAddress }.toSet() == setOf("john.doe@student.hu.nl", "jane.doe@hu.nl") &&
-                    course2.users.map { it.emailAddress }.toSet() == setOf("john.doe@student.hu.nl", "test.user@student.hu.nl")
+                    course1.users.map { it.email }.toSet() == setOf("john.doe@student.hu.nl", "jane.doe@hu.nl") &&
+                    course2.users.map { it.email }.toSet() == setOf("john.doe@student.hu.nl", "test.user@student.hu.nl")
         })
     }
 
@@ -119,7 +119,7 @@ class DashboardServiceImplTest {
         service.addUsersToCourse()
 
         verify(usersDB).saveAll(argThat { users: Collection<Users> ->
-            val user = users.find { it.emailAddress == "john.doe@student.hu.nl" }
+            val user = users.find { it.email == "john.doe@student.hu.nl" }
             user != null && user.courses.size == 2
         })
     }
@@ -129,7 +129,7 @@ class DashboardServiceImplTest {
         service.addUsersToCourse()
 
         verify(courseDB).saveAll(argThat { courses: Collection<Course> ->
-            val course = courses.find { it.canvasId == 50304 }
+            val course = courses.find { it.canvasCourseId == 50304 }
             course != null && course.users.size == 2
         })
     }
@@ -139,7 +139,7 @@ class DashboardServiceImplTest {
         service.addUsersToCourse()
 
         verify(usersDB).saveAll(argThat { users: Collection<Users> ->
-            users.none { it.emailAddress == "null"}
+            users.none { it.email == "null"}
         })
     }
 
