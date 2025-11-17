@@ -28,4 +28,4 @@ services:
       context: ./frontend/canvas_dashboard
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "5050:80"
