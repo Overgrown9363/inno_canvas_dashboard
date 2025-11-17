@@ -11,7 +11,7 @@ services:
       - ./prod/db:/docker-entrypoint-initdb.d
 
   backend:
-    image: ghcr.io/Overgrown9363/inno_canvas_dashboard-backend:latest
+    image: ghcr.io/overgrown9363/inno_canvas_dashboard-backend:latest
     depends_on:
       - db
     environment:
@@ -22,7 +22,7 @@ services:
       - "8080:8080"
 
   frontend:
-    image: ghcr.io/Overgrown9363/inno_canvas_dashboard-frontend:latest
+    image: ghcr.io/overgrown9363/inno_canvas_dashboard-frontend:latest
     depends_on:
       - backend
     ports:
