@@ -1,4 +1,4 @@
-name: Build on GitHub and deploy to server
+name: Deploy on Self-hosted Runner
 
 on:
   push:
@@ -6,24 +6,13 @@ on:
       - main
   workflow_dispatch:
 
-env:
-  REGISTRY: ghcr.io
-
 jobs:
-  build:
-    # ---- RUNS ON GITHUB ----
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+  build-and-deploy:
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-        # ---- SETUP LOWERCASE OWNER ----
-      - name: Get lowercase repository owner
-        run: echo "REPO_OWNER_LOWERCASE=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
         # ---- CACHING FRONTEND ----
       - name: Cache node modules
@@ -48,7 +37,7 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
-
+            
         # ---- BUILD BACKEND ----
       - name: Run backend tests
         run: ./gradlew test
@@ -57,71 +46,13 @@ jobs:
         run: ./gradlew bootJar --no-daemon
 
         # ---- BUILD FRONTEND ----
-      - name: Install frontend dependencies
-        working-directory: frontend/canvas_dashboard
-        run: npm ci
-
       - name: Build frontend
         working-directory: frontend/canvas_dashboard
-        run: npm run build
-
-        # ---- LOGIN TO GHCR ----
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-        # ---- BUILD BACKEND IMAGE ----
-      - name: Build backend image
         run: |
-          docker build \
-            -f Dockerfile \
-            -t $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-backend:latest \
-            .
-
-        # ---- BUILD FRONTEND IMAGE ----
-      - name: Build frontend image
-        run: |
-          docker build \
-            -f frontend/canvas_dashboard/Dockerfile \
-            -t $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-frontend:latest \
-            frontend/canvas_dashboard
-
-        # ---- PUSH IMAGES ----
-      - name: Push images
-        run: |
-          docker push $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-backend:latest
-          docker push $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-frontend:latest
-  
-  deploy:
-    # ---- RUNS ON SERVER ----
-    runs-on: self-hosted
-    needs: build
-    permissions:
-      packages: read
-
-    steps:
-        # ---- SETUP LOWERCASE OWNER ----
-      - name: Get lowercase repository owner
-        run: echo "REPO_OWNER_LOWERCASE=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
-        # ---- LOGIN TO GHCR ----
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-    
-        # ---- PULL IMAGES ----
-      - name: Pull images
-        run: |
-          docker pull $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-backend:latest
-          docker pull $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-frontend:latest
+          npm ci
+          npm run build
 
         # ---- START CONTAINERS ----
-      - name: Start containers
+      - name: Build and start containers
         run: |
-          docker compose -f docker-compose.prod.yml up -d --remove-orphans
+          docker compose -f docker-compose.prod.yml up --build -d --remove-orphans

@@ -11,7 +11,9 @@ services:
       - ./prod/db:/docker-entrypoint-initdb.d
 
   backend:
-    image: ghcr.io/Overgrown9363/inno_canvas_dashboard-backend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     depends_on:
       - db
     environment:
@@ -20,10 +22,22 @@ services:
       SPRING_DATASOURCE_PASSWORD: inno-dashboard
     ports:
       - "8080:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.inno-dashboard.duckdns.org`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=myresolver"
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
 
   frontend:
-    image: ghcr.io/Overgrown9363/inno_canvas_dashboard-frontend:latest
-    depends_on:
-      - backend
+    build:
+      context: ./frontend/canvas_dashboard
+      dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "5050:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`inno-dashboard.duckdns.org`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+      - "traefik.http.services.frontend.loadbalancer.server.port=5050"
