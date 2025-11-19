@@ -37,6 +37,8 @@ services:
     build:
       context: ./frontend/canvas_dashboard
       dockerfile: Dockerfile
+    depends_on:
+      - backend
     expose:
       - "80"
     labels:
