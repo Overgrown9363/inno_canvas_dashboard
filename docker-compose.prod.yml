@@ -20,24 +20,23 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/inno-dashboard
       SPRING_DATASOURCE_USERNAME: inno-dashboard
       SPRING_DATASOURCE_PASSWORD: inno-dashboard
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`api.inno-dashboard.duckdns.org`)"
+      - "traefik.http.routers.backend.rule=Host(`api.inno-dashboard.duckdns.org`)
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls.certresolver=myresolver"
-      - "traefik.http.services.backend.loadbalancer.server.port=8080"
+
 
   frontend:
     build:
       context: ./frontend/canvas_dashboard
       dockerfile: Dockerfile
-    ports:
-      - "5050:80"
+    expose:
+      - "80"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`inno-dashboard.duckdns.org`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=myresolver"
-      - "traefik.http.services.frontend.loadbalancer.server.port=5050"
