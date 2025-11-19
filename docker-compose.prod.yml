@@ -27,10 +27,10 @@ services:
       - backend
     expose:
       - "80"
-    environment:
-      VIRTUAL_HOST=inno-dashboard.duckdns.org
-      LETSENCRYPT_HOST=inno-dashboard.duckdns.org
-      LETSENCRYPT_EMAIL=nick.schneiders@student.hu.nl
+    # environment:
+    #   VIRTUAL_HOST=inno-dashboard.duckdns.org
+    #   LETSENCRYPT_HOST=inno-dashboard.duckdns.org
+    #   LETSENCRYPT_EMAIL=nick.schneiders@student.hu.nl
 
   nginx-proxy:
     image: jwilder/nginx-proxy
