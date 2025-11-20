@@ -46,9 +46,6 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
         # ---- BUILD BACKEND ----
       - name: Run backend tests
         run: ./gradlew test
@@ -94,7 +91,7 @@ jobs:
         run: |
           docker push $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-backend:latest
           docker push $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-frontend:latest
-          
+
   deploy:
     # ---- RUNS ON SERVER ----
     runs-on: self-hosted
