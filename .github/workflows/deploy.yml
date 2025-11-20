@@ -1,58 +1,42 @@
-name: Deploy on Self-hosted Runner
+name: Deploy to server
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
+env:
+  REGISTRY: ghcr.io
+
 jobs:
-  build-and-deploy:
+  deploy:
+    # ---- RUNS ON SERVER ----
     runs-on: self-hosted
+    permissions:
+      packages: read
+      contents: read
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-        # ---- CACHING FRONTEND ----
-      - name: Cache node modules
-        uses: actions/cache@v4
+        # ---- SETUP LOWERCASE OWNER ----
+      - name: Get lowercase repository owner
+        run: echo "REPO_OWNER_LOWERCASE=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+        # ---- LOGIN TO GHCR ----
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3.6.0
         with:
-          path: frontend/canvas_dashboard/node_modules
-          key: node-${{ runner.os }}-${{ hashFiles('frontend/canvas_dashboard/package-lock.json') }}
-          restore-keys: node-${{ runner.os }}-
-      
-        # ---- BUILD REQUIREMENTS ----
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'gradle'
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
     
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-            
-        # ---- BUILD BACKEND ----
-      - name: Run backend tests
-        run: ./gradlew test
-
-      - name: Build backend JAR
-        run: ./gradlew bootJar --no-daemon
-
-        # ---- BUILD FRONTEND ----
-      - name: Build frontend
-        working-directory: frontend/canvas_dashboard
+        # ---- PULL IMAGES ----
+      - name: Pull images
         run: |
-          npm ci
-          npm run build
+          docker pull $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-backend:latest
+          docker pull $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-frontend:latest
 
         # ---- START CONTAINERS ----
-      - name: Build and start containers
+      - name: Start containers
         run: |
-          docker compose -f docker-compose.prod.yml up --build -d --remove-orphans
+          docker compose -f docker-compose.prod.yml up -d --remove-orphans
