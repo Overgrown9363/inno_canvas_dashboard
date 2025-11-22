@@ -1,5 +1,6 @@
 package nl.hu.inno.dashboard.dashboard.application
 
+import nl.hu.inno.dashboard.dashboard.application.dto.UsersDTO
 import nl.hu.inno.dashboard.dashboard.data.CourseRepository
 import nl.hu.inno.dashboard.dashboard.data.UsersRepository
 import nl.hu.inno.dashboard.dashboard.domain.Course
@@ -20,8 +21,9 @@ class DashboardServiceImpl(
     private val fileParserService: FileParserService,
     private val fileFetcherService: FileFetcherService,
 ) : DashboardService {
-    override fun findCourseById(id: Int): Course? {
-        return courseDB.findByIdOrNull(id)
+    override fun findUserByEmail(email: String): UsersDTO? {
+        val user = usersDB.findByIdOrNull(email)
+        return UsersDTO.of(user)
     }
 
     override fun addUsersToCourse() {
