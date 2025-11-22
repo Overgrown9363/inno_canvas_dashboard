@@ -26,7 +26,7 @@ class Users (
 ) {
     companion object {
         fun of(email: String, name: String, role: Role = Role.STUDENT, courses: MutableSet<Course> = mutableSetOf()): Users {
-            return Users(email, name, role, courses)
+            return Users(email.lowercase(), name, role, courses)
         }
     }
 
