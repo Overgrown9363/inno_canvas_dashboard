@@ -11,21 +11,54 @@ services:
       - ./prod/db:/docker-entrypoint-initdb.d
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/overgrown9363/inno_canvas_dashboard-backend:latest
     depends_on:
       - db
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/inno-dashboard
       SPRING_DATASOURCE_USERNAME: inno-dashboard
       SPRING_DATASOURCE_PASSWORD: inno-dashboard
-    ports:
-      - "8080:8080"
+
+      AZURE_TENANT_ID: ${AZURE_TENANT_ID}
+      AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
+      AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
+    expose:
+      - "8080"
 
   frontend:
-    build:
-      context: ./frontend/canvas_dashboard
-      dockerfile: Dockerfile
+    image: ghcr.io/overgrown9363/inno_canvas_dashboard-frontend:latest
+    depends_on:
+      - backend
+    environment:
+      - VITE_LOGOUT_URL=http://145.89.192.173:8080/logout
+      - VITE_AUTH_URL=http://145.89.192.173:8080/oauth2/authorization/azure
+    expose:
+      - "80"
+    # environment:
+    #   VIRTUAL_HOST=inno-dashboard.duckdns.org
+    #   LETSENCRYPT_HOST=inno-dashboard.duckdns.org
+    #   LETSENCRYPT_EMAIL=nick.schneiders@student.hu.nl
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs:rw
+      - ./vhost.d:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+
+  letsencrypt:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/etc/nginx/certs:rw
+      - ./vhost.d:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+    environment:
+      DEFAULT_EMAIL: nick.schneiders@student.hu.nl
+      NGINX_PROXY_CONTAINER: nginx-proxy 
