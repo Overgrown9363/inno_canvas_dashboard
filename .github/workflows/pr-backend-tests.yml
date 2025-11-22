@@ -15,6 +15,7 @@ on:
       - 'Dockerfile'
       - 'Dockerfile.*'
       - '.github/**'
+  workflow_dispatch:
 
 jobs:
   test-backend:
