@@ -18,6 +18,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/inno-dashboard
       SPRING_DATASOURCE_USERNAME: inno-dashboard
       SPRING_DATASOURCE_PASSWORD: inno-dashboard
+
+      AZURE_TENANT_ID: ${AZURE_TENANT_ID}
+      AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
+      AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
     expose:
       - "8080"
 
@@ -25,6 +29,9 @@ services:
     image: ghcr.io/overgrown9363/inno_canvas_dashboard-frontend:latest
     depends_on:
       - backend
+    environment:
+      - VITE_LOGOUT_URL=http://145.89.192.173:8080/logout
+      - VITE_AUTH_URL=http://145.89.192.173:8080/oauth2/authorization/azure
     expose:
       - "80"
     # environment:
