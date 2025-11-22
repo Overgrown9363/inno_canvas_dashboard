@@ -1,0 +1,44 @@
+name: Run backend tests on PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'build.gradle*'
+      - 'settings.gradle*'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'Dockerfile'
+      - 'Dockerfile.*'
+      - '.github/**'
+  workflow_dispatch:
+
+jobs:
+  test-backend:
+    name: Run Kotlin backend tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+        # ---- BUILD REQUIREMENTS ----
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+
+      - name: Grant gradlew execute permission
+        run: chmod +x ./gradlew
+
+        # --- RUN BACKEND TESTS ----
+      - name: Run backend tests
+        run: ./gradlew test --no-daemon --stacktrace

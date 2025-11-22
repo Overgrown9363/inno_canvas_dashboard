@@ -50,11 +50,8 @@ jobs:
         run: chmod +x ./gradlew
 
         # ---- BUILD BACKEND ----
-      - name: Run backend tests
-        run: ./gradlew test
-
-      - name: Build backend JAR
-        run: ./gradlew bootJar --no-daemon
+      - name: Run backend tests and build JAR
+        run: ./gradlew test bootJar --no-daemon
 
         # ---- BUILD FRONTEND ----
       - name: Install frontend dependencies
