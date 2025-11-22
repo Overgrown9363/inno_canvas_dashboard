@@ -7,7 +7,11 @@ function NavBar() {
     return (
         <nav id="navbar">
             <ul>
-                <li><img src={HuLogo} alt="" /></li>
+                <li>
+                    <Link to="/">
+                        <img src={HuLogo} alt="Hogeschool Utrecht logo die terug wijst naar de startpagina." />
+                    </Link>
+                </li>
                 <li>
                     <Link to="/">Home</Link>
                 </li>
