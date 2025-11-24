@@ -60,7 +60,7 @@ jobs:
           file: Dockerfile
           push: true
           tags: |
-            $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-backend:latest
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LOWERCASE }}/inno_canvas_dashboard-backend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -72,7 +72,7 @@ jobs:
           file: frontend/canvas_dashboard/Dockerfile
           push: true
           tags: |
-            $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-frontend:latest
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LOWERCASE }}/inno_canvas_dashboard-frontend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -103,8 +103,8 @@ jobs:
         # ---- PULL IMAGES ----
       - name: Pull images
         run: |
-          docker pull $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-backend:latest
-          docker pull $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-frontend:latest
+          docker pull ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LOWERCASE }}/inno_canvas_dashboard-backend:latest
+          docker pull ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LOWERCASE }}/inno_canvas_dashboard-frontend:latest
 
         # ---- START CONTAINERS ----
       - name: Start containers
