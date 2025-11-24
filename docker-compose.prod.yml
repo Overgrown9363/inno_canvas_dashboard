@@ -1,3 +1,4 @@
+
 services:
   db:
     image: postgres:16
@@ -34,31 +35,14 @@ services:
       - VITE_AUTH_URL=http://145.89.192.173:8080/oauth2/authorization/azure
     expose:
       - "80"
-    # environment:
-    #   VIRTUAL_HOST=inno-dashboard.duckdns.org
-    #   LETSENCRYPT_HOST=inno-dashboard.duckdns.org
-    #   LETSENCRYPT_EMAIL=nick.schneiders@student.hu.nl
 
-  nginx-proxy:
-    image: jwilder/nginx-proxy
-    container_name: nginx-proxy
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./certs:/etc/nginx/certs:rw
-      - ./vhost.d:/etc/nginx/vhost.d
-      - ./html:/usr/share/nginx/html
-
-  letsencrypt:
-    image: nginxproxy/acme-companion
-    container_name: nginx-proxy-acme
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./certs:/etc/nginx/certs:rw
-      - ./vhost.d:/etc/nginx/vhost.d
-      - ./html:/usr/share/nginx/html
-    environment:
-      DEFAULT_EMAIL: nick.schneiders@student.hu.nl
-      NGINX_PROXY_CONTAINER: nginx-proxy 
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy_data:/data
