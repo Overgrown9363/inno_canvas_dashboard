@@ -45,7 +45,7 @@ jobs:
         run: |
           docker build \
             -f Dockerfile \
-            -t $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-backend:latest \
+            -t ${{ env.REGISTRY}}/${{ env.REPO_OWNER_LOWERCASE }}/inno_canvas_dashboard-backend:latest \
             .
 
         # ---- BUILD FRONTEND IMAGE ----
@@ -53,7 +53,7 @@ jobs:
         run: |
           docker build \
             -f frontend/canvas_dashboard/Dockerfile \
-            -t $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-frontend:latest \
+            -t ${{ env.REGISTRY}}/${{ env.REPO_OWNER_LOWERCASE }}/inno_canvas_dashboard-frontend:latest \
             frontend/canvas_dashboard
 
         # ---- LOGIN TO GHCR ----
@@ -67,8 +67,8 @@ jobs:
         # ---- PUSH IMAGES ----
       - name: Push images
         run: |
-          docker push $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-backend:latest
-          docker push $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-frontend:latest
+          docker push ${{ env.REGISTRY}}/${{ env.REPO_OWNER_LOWERCASE }}/inno_canvas_dashboard-backend:latest
+          docker push ${{ env.REGISTRY}}/${{ env.REPO_OWNER_LOWERCASE }}/inno_canvas_dashboard-frontend:latest
 
   deploy:
     # ---- RUNS ON SERVER ----
@@ -97,8 +97,8 @@ jobs:
         # ---- PULL IMAGES ----
       - name: Pull images
         run: |
-          docker pull $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-backend:latest
-          docker pull $REGISTRY/${REPO_OWNER_LOWERCASE}/inno_canvas_dashboard-frontend:latest
+          docker pull ${{ env.REGISTRY}}/${{ env.REPO_OWNER_LOWERCASE }}/inno_canvas_dashboard-backend:latest
+          docker pull ${{ env.REGISTRY}}/${{ env.REPO_OWNER_LOWERCASE }}/inno_canvas_dashboard-frontend:latest
 
         # ---- START CONTAINERS ----
       - name: Start containers
