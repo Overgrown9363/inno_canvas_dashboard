@@ -1,8 +1,10 @@
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /app
+COPY . .
+RUN ./gradlew bootJar --no-daemon
 
-COPY build/libs/inno_canvas_dashboard-*.jar app.jar
-
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=build /app/build/libs/inno_canvas_dashboard-*.jar app.jar
 EXPOSE 8080
-
 ENTRYPOINT ["java", "-jar", "app.jar"]
