@@ -1,28 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { getUserData } from "../api/getUserData.js";
 import CardGridSkeleton from "./CardGridSkeleton";
 import "../css/card-grid.css";
 
-const CardGrid = () => {
-  const [loading, setLoading] = useState(true);
-  const [courses, setCourses] = useState([]);
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const data = await getUserData();
-        setCourses(data.courses);
-      } catch (err) {
-        console.error("Error loading courses:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadData();
-  }, []);
-
-  if (loading) return <CardGridSkeleton />;
+const CardGrid = ({ courses}) => {
+  if (!courses) return <CardGridSkeleton />;
 
   const currentDate = new Date();
 
