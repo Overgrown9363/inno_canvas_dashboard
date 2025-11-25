@@ -1,5 +1,4 @@
 import CardGridSkeleton from "./CardGridSkeleton";
-import { getDashboardUrl } from "../utils/dashboardUrl.js";
 import { Link } from "react-router-dom";
 import "../css/card-grid.css";
 
