@@ -53,6 +53,8 @@ jobs:
         run: |
           docker build \
             -f frontend/canvas_dashboard/Dockerfile \
+            --build-arg VITE_AUTH_URL="${{ vars.VITE_AUTH_URL }}" \
+            --build-arg VITE_LOGOUT_URL="${{ vars.VITE_LOGOUT_URL }}" \
             -t ${{ env.REGISTRY}}/${{ env.REPO_OWNER_LOWERCASE }}/inno_canvas_dashboard-frontend:latest \
             frontend/canvas_dashboard
 
@@ -100,16 +102,17 @@ jobs:
           docker pull ${{ env.REGISTRY}}/${{ env.REPO_OWNER_LOWERCASE }}/inno_canvas_dashboard-backend:latest
           docker pull ${{ env.REGISTRY}}/${{ env.REPO_OWNER_LOWERCASE }}/inno_canvas_dashboard-frontend:latest
         
-          # ---- MAKE SECRETS AVAILABLE ----
+        # ---- MAKE SECRETS AVAILABLE ----
       - name: Write secrets to .env file
         run: |
           cat <<EOF > .env
           AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}
+          APP_HOME_FRONTEND_REDIRECT_URL=${{ vars.APP_HOME_FRONTEND_REDIRECT_URL }}
           EOF
 
-          # ---- START CONTAINERS ----
+        # ---- START CONTAINERS ----
       - name: Start containers
         run: |
           docker compose -f docker-compose.prod.yml up -d --remove-orphans
