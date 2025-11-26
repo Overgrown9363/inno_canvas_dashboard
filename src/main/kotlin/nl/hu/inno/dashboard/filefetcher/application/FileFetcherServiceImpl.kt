@@ -8,13 +8,14 @@ import java.net.URI
 
 @Service
 class FileFetcherServiceImpl : FileFetcherService {
+    private val hostName = "http://localhost:5000"
+
     override fun fetchCsvFile(): Resource {
-        TODO("Not yet implemented")
+        val path = "${hostName}/courses/user_data.csv"
+        return UrlResource(URI.create(path))
     }
 
     override fun fetchDashboardHtml(instanceName: String, role: String, email: String): Resource {
-        val hostName = "http://localhost:5000"
-
         val path = when (role) {
             "ADMIN", "TEACHER" -> {
                 "${hostName}/${instanceName}/dashboard_${instanceName}/index.html"
