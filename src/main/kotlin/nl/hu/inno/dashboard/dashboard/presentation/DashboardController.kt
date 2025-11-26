@@ -41,12 +41,13 @@ class DashboardController(
         return ResponseEntity.ok(resource)
     }
 
-    @PostMapping("/internal/users/new")
+    @PostMapping("/internal/db")
     fun refreshUsersAndCourses(): ResponseEntity<Void> {
         return try {
             service.refreshUsersAndCourses()
             ResponseEntity.ok().build()
         } catch (e: Exception) {
+            e.printStackTrace()
             ResponseEntity.internalServerError().build()
         }
     }
