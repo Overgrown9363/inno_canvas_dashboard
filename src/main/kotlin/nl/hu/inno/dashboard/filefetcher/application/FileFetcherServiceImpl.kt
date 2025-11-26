@@ -11,7 +11,7 @@ class FileFetcherServiceImpl : FileFetcherService {
     private val hostName = "http://localhost:5000"
 
     override fun fetchCsvFile(): Resource {
-        val path = "${hostName}/courses/user_data.csv"
+        val path = "${hostName}/user_data.csv"
         return UrlResource(URI.create(path))
     }
 
