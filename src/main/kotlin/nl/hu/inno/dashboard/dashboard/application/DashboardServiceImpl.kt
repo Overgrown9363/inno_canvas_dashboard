@@ -22,7 +22,8 @@ class DashboardServiceImpl(
     private val fileFetcherService: FileFetcherService,
 ) : DashboardService {
     override fun findUserByEmail(email: String): UsersDTO? {
-        val user = usersDB.findByIdOrNull(email)
+        val lowercaseEmail = email.lowercase()
+        val user = usersDB.findByIdOrNull(lowercaseEmail)
         return UsersDTO.of(user)
     }
 

@@ -19,7 +19,7 @@ class DashboardController(
 
     @GetMapping("/users/")
     fun getCurrentUser(@AuthenticationPrincipal user: OAuth2User): ResponseEntity<UsersDTO> {
-        val email = (user.attributes["email"] as? String)?.lowercase()
+        val email = user.attributes["email"] as? String
         if (email.isNullOrBlank()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
