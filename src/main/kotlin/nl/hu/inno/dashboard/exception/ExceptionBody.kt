@@ -1,6 +1,6 @@
 package nl.hu.inno.dashboard.exception
 
-import java.util.Date
+import java.util.*
 
 data class ExceptionBody(
     val timestamp: Date = Date(),
