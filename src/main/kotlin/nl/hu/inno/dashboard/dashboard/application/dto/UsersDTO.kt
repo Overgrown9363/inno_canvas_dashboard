@@ -9,8 +9,7 @@ data class UsersDTO (
     val courses: List<CourseDTO> = emptyList()
 ) {
     companion object {
-        fun of(user: Users?): UsersDTO? {
-            if (user == null) return null
+        fun of(user: Users): UsersDTO {
             return UsersDTO(
                 email = user.email,
                 name = user.name,

@@ -6,8 +6,10 @@ import nl.hu.inno.dashboard.dashboard.data.UsersRepository
 import nl.hu.inno.dashboard.dashboard.domain.Course
 import nl.hu.inno.dashboard.dashboard.domain.Role
 import nl.hu.inno.dashboard.dashboard.domain.Users
+import nl.hu.inno.dashboard.dashboard.domain.exception.UserNotFoundException
 import nl.hu.inno.dashboard.filefetcher.application.FileFetcherService
 import nl.hu.inno.dashboard.fileparser.application.FileParserService
+import org.springframework.core.io.Resource
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -21,10 +23,16 @@ class DashboardServiceImpl(
     private val fileParserService: FileParserService,
     private val fileFetcherService: FileFetcherService,
 ) : DashboardService {
-    override fun findUserByEmail(email: String): UsersDTO? {
-        val lowercaseEmail = email.lowercase()
-        val user = usersDB.findByIdOrNull(lowercaseEmail)
+    override fun findUserByEmail(email: String): UsersDTO {
+        val user = findUserInDatabaseByEmail(email)
         return UsersDTO.of(user)
+    }
+
+    override fun getDashboardHtml(email: String, instanceName: String): Resource {
+        val user = findUserInDatabaseByEmail(email)
+
+        val userRole = user.role.name
+        return fileFetcherService.fetchDashboardHtml(instanceName, userRole, user.email)
     }
 
     override fun addUsersToCourse() {
@@ -50,6 +58,15 @@ class DashboardServiceImpl(
         // update associations between users and course (add AND remove associations for users and courses)
 
         // persist changes in courses, users and their associations
+    }
+
+    private fun findUserInDatabaseByEmail(email: String): Users {
+        val lowercaseEmail = email.lowercase()
+        val user = usersDB.findByIdOrNull(lowercaseEmail)
+        if (user == null) {
+            throw UserNotFoundException("User with email $email not found")
+        }
+        return user
     }
 
     private fun extractCourseIdsFrom(records: List<List<String>>): Set<Int> =
