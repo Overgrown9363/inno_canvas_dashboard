@@ -1,11 +1,5 @@
-### Get a user by id
-GET http://localhost:8080/api/v1/dashboard/users/john.doe@student.hu.nl
+### Refresh users and courses in the database - locally
+POST http://localhost:8080/api/v1/dashboard/internal/users/refresh
 
-### Get a user by id (live)
-GET http://10.3.0.67/api/v1/dashboard/users/john.doe@student.hu.nl
-
-### Add new users and courses to database
-POST http://localhost:8080/api/v1/dashboard/internal/users/new
-
-### Update users and courses in database
-POST http://10.3.0.67/api/v1/dashboard/internal/users/update
+### Refresh users and courses in the database - live server
+POST https://inno-dashboard.duckdns.org/api/v1/dashboard/internal/users/refresh

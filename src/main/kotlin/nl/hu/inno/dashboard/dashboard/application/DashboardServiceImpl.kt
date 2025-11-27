@@ -6,8 +6,10 @@ import nl.hu.inno.dashboard.dashboard.data.UsersRepository
 import nl.hu.inno.dashboard.dashboard.domain.Course
 import nl.hu.inno.dashboard.dashboard.domain.Role
 import nl.hu.inno.dashboard.dashboard.domain.Users
+import nl.hu.inno.dashboard.dashboard.domain.exception.UserNotFoundException
 import nl.hu.inno.dashboard.filefetcher.application.FileFetcherService
 import nl.hu.inno.dashboard.fileparser.application.FileParserService
+import org.springframework.core.io.Resource
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -21,70 +23,57 @@ class DashboardServiceImpl(
     private val fileParserService: FileParserService,
     private val fileFetcherService: FileFetcherService,
 ) : DashboardService {
-    override fun findUserByEmail(email: String): UsersDTO? {
-        val user = usersDB.findByIdOrNull(email)
+    override fun findUserByEmail(email: String): UsersDTO {
+        val user = findUserInDatabaseByEmail(email)
         return UsersDTO.of(user)
     }
 
-    override fun addUsersToCourse() {
+    override fun getDashboardHtml(email: String, instanceName: String): Resource {
+        val user = findUserInDatabaseByEmail(email)
+
+//        NOTE: we may need to add a check to see if this user has a course in their [user.courses] list with a matching instanceName for safety
+        val userRole = user.role.name
+        return fileFetcherService.fetchDashboardHtml(instanceName, userRole, user.email)
+    }
+
+    override fun refreshUsersAndCourses() {
         val resource = fileFetcherService.fetchCsvFile()
         val records = fileParserService.parseFile(resource)
 
-        val courseIds = extractCourseIdsFrom(records)
-        val emails = extractUserEmailsFrom(records)
-        val courseCache = fillCourseCacheWithExistingCourses(courseIds)
-        val usersCache = fillUsersCacheWithExistingUsers(emails)
-        addNewCoursesAndUsers(records, courseCache, usersCache)
+        val usersCache = mutableMapOf<String, Users>()
+        val courseCache = mutableMapOf<Int, Course>()
+        linkUsersAndCourses(records, usersCache, courseCache)
+
+        courseDB.deleteAll()
+        usersDB.deleteAll()
 
         courseDB.saveAll(courseCache.values)
         usersDB.saveAll(usersCache.values)
     }
 
-    override fun updateUsersInCourse() {
-        TODO("Not yet implemented")
-        // call to new integration component to fetch csv file
-
-        // call to fileParserServic to read MultiPartFile and return List<List<String>> data
-
-        // update associations between users and course (add AND remove associations for users and courses)
-
-        // persist changes in courses, users and their associations
+    private fun findUserInDatabaseByEmail(email: String): Users {
+        val lowercaseEmail = email.lowercase()
+        val user = usersDB.findByIdOrNull(lowercaseEmail)
+        if (user == null) {
+            throw UserNotFoundException("User with email $email not found")
+        }
+        return user
     }
 
-    private fun extractCourseIdsFrom(records: List<List<String>>): Set<Int> =
-        records.map { it[CsvColumns.CANVAS_COURSE_ID].toInt() }.toSet()
-
-    private fun extractUserEmailsFrom(records: List<List<String>>): Set<String> =
-        records.map { it[CsvColumns.USER_EMAIL] }
-            .filter { it.isNotBlank() && it.lowercase() != "null" }
-            .toSet()
-
-    private fun fillCourseCacheWithExistingCourses(courseIds: Set<Int>): MutableMap<Int, Course> =
-        courseDB.findAllById(courseIds).associateBy { it.canvasCourseId }.toMutableMap()
-
-    private fun fillUsersCacheWithExistingUsers(emails: Set<String>): MutableMap<String, Users> =
-        usersDB.findAllById(emails).associateBy { it.email }.toMutableMap()
-
-    private fun addNewCoursesAndUsers(
+    private fun linkUsersAndCourses(
         records: List<List<String>>,
-        courseCache: MutableMap<Int, Course>,
-        usersCache: MutableMap<String, Users>
+        usersCache: MutableMap<String, Users>,
+        courseCache: MutableMap<Int, Course>
     ) {
         for (record in records) {
-            val canvasCourseId = record[CsvColumns.CANVAS_COURSE_ID].toInt()
             val email = record[CsvColumns.USER_EMAIL]
             if (email.isBlank() || email.lowercase() == "null") continue
+            val canvasCourseId = record[CsvColumns.CANVAS_COURSE_ID].toInt()
 
-            val course = courseCache.getOrPut(canvasCourseId) {
-                convertToCourse(record)
-            }
+            val user = usersCache.getOrPut(email) { convertToUser(record) }
+            val course = courseCache.getOrPut(canvasCourseId) { convertToCourse(record) }
 
-            val user = usersCache.getOrPut(email) {
-                convertToUser(record)
-            }
-
-            course.users.add(user)
-            user.courses.add(course)
+            user.linkWithCourse(course)
         }
     }
 
