@@ -37,7 +37,7 @@ class DashboardController(
         return ResponseEntity.ok(resource)
     }
 
-    @PostMapping("/internal/db")
+    @PostMapping("/internal/users/refresh")
     fun refreshUsersAndCourses(): ResponseEntity<Void> {
         return try {
             service.refreshUsersAndCourses()

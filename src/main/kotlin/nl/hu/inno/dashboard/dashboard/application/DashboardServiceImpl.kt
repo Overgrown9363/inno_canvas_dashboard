@@ -31,6 +31,7 @@ class DashboardServiceImpl(
     override fun getDashboardHtml(email: String, instanceName: String): Resource {
         val user = findUserInDatabaseByEmail(email)
 
+//        NOTE: we may need to add a check to see if this user has a course in their [user.courses] list with a matching instanceName for safety
         val userRole = user.role.name
         return fileFetcherService.fetchDashboardHtml(instanceName, userRole, user.email)
     }

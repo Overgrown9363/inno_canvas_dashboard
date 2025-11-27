@@ -27,7 +27,7 @@ class SecurityConfig(
         http
             .authorizeHttpRequests { requests ->
                 requests
-                    .requestMatchers("/h2-console/**").permitAll()
+                    .requestMatchers("/api/v1/dashboard/internal/users/refresh").permitAll()
                     .anyRequest().authenticated()
             }
             .oauth2Login { login ->
