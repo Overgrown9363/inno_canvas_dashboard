@@ -24,15 +24,9 @@ class FileFetcherServiceDev(
     override fun fetchDashboardHtml(instanceName: String, fullPath: String, role: String, email: String): Resource {
         /*
         TODO:
-        - make sure path filtering on /students/  and /general/ always goes well for teacher dashboard
         - separate functionality -> move logic to domain
         - ensure parity between dev and impl versions
-        - figure out if dev/prod profiles work on domain somehow?
-        - consolidate functions in `when` where possible and replace final `else` with an exception
         - move constants outside of class specific companion object depending on how the spring profiles will end up working for local/prod
-        -
-        - look into difference between current implementation and using rest templates -> which is better in our use-case?
-        - add necessary exceptions if fetch fails -> especially important if using rest template and get != status 200
         -
         - remove prints
         -
@@ -63,6 +57,7 @@ class FileFetcherServiceDev(
             else -> throw InvalidRoleException("Role '$role' is not a valid role")
         }
         println("Final path: $path")
+        println("_____")
         return UrlResource(URI.create(path))
     }
     companion object {
