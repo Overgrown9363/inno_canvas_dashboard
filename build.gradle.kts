@@ -64,4 +64,14 @@ tasks.jacocoTestReport {
         csv.required = false
         html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
     }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(
+                    "nl/hu/inno/dashboard/security/**",
+                    "nl/hu/inno/dashboard/exception/**"
+                )
+            }
+        })
+    )
 }
