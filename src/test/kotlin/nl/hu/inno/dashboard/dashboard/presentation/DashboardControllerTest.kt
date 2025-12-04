@@ -1,5 +1,6 @@
 package nl.hu.inno.dashboard.dashboard.presentation
 
+import jakarta.servlet.http.HttpServletRequest
 import nl.hu.inno.dashboard.dashboard.application.DashboardServiceImpl
 import nl.hu.inno.dashboard.dashboard.application.dto.UsersDTO
 import nl.hu.inno.dashboard.exception.exceptions.UserNotFoundException
@@ -11,6 +12,8 @@ import org.mockito.Mockito.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.oauth2.core.user.OAuth2User
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.Resource
 
 class DashboardControllerTest {
     private lateinit var service: DashboardServiceImpl
@@ -54,6 +57,59 @@ class DashboardControllerTest {
         assertThrows<UserNotFoundException> {
             controller.getCurrentUser(mockUser)
         }
+    }
+
+    @Test
+    fun getCurrentUser_returnsUnauthorized_whenEmailIsBlank() {
+        val mockUser = mock(OAuth2User::class.java)
+        `when`(mockUser.attributes).thenReturn(mapOf("email" to ""))
+
+        val actualResponse = controller.getCurrentUser(mockUser)
+
+        assertEquals(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build<UsersDTO>(), actualResponse)
+    }
+
+    @Test
+    fun getDashboard_returnsResource_whenEmailPresent() {
+        val mockUser = mock(OAuth2User::class.java)
+        val instanceName = "testInstance"
+        val email = "john.doe@student.hu.nl"
+        val request = mock(HttpServletRequest::class.java)
+        val relativeRequestPath = "testInstance/dashboard"
+        val expectedResource = ByteArrayResource("html".toByteArray())
+        `when`(mockUser.attributes).thenReturn(mapOf("email" to email))
+        `when`(request.requestURI).thenReturn("/api/v1/dashboard/$relativeRequestPath")
+        `when`(service.getDashboardHtml(email, instanceName, relativeRequestPath)).thenReturn(expectedResource)
+
+        val response = controller.getDashboard(instanceName, mockUser, request)
+
+        assertEquals(ResponseEntity.ok(expectedResource), response)
+    }
+
+    @Test
+    fun getDashboard_returnsUnauthorized_whenEmailMissing() {
+        val mockUser = mock(OAuth2User::class.java)
+        val instanceName = "testInstance"
+        val request = mock(HttpServletRequest::class.java)
+        `when`(mockUser.attributes).thenReturn(emptyMap<String, Any>())
+        `when`(request.requestURI).thenReturn("/api/v1/dashboard/testInstance/dashboard")
+
+        val response = controller.getDashboard(instanceName, mockUser, request)
+
+        assertEquals(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build<Resource>(), response)
+    }
+
+    @Test
+    fun getDashboard_returnsUnauthorized_whenEmailIsBlank() {
+        val mockUser = mock(OAuth2User::class.java)
+        val instanceName = "testInstance"
+        val request = mock(HttpServletRequest::class.java)
+        `when`(mockUser.attributes).thenReturn(mapOf("email" to ""))
+        `when`(request.requestURI).thenReturn("/api/v1/dashboard/testInstance/dashboard")
+
+        val response = controller.getDashboard(instanceName, mockUser, request)
+
+        assertEquals(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build<Resource>(), response)
     }
 
     @Test
