@@ -1,5 +1,6 @@
 package nl.hu.inno.dashboard.filefetcher.application
 
+import nl.hu.inno.dashboard.exception.exceptions.InvalidPathException
 import nl.hu.inno.dashboard.filefetcher.domain.HtmlPathResolver
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -21,10 +22,17 @@ class FileFetcherServiceImpl(
     }
 
     override fun fetchDashboardHtml(email: String, role : String, instanceName: String, relativeRequestPath: String): Resource {
-        val baseUrlWithInstance = "$baseUrl/$instanceName/dashboard_$instanceName"
+        val courseCode = instanceName.substringBefore("_")
+
+        val baseUrlWithInstance = "$baseUrl/$courseCode/$instanceName/dashboard"
         val resolvedPath = HtmlPathResolver.resolvePath(email, role, instanceName, relativeRequestPath)
         val fullPath = "$baseUrlWithInstance/$resolvedPath"
 
-        return UrlResource(URI.create(fullPath))
+        val resource = UrlResource(URI.create(fullPath))
+        if (!resource.exists()) {
+            throw InvalidPathException("Path $resolvedPath did not lead to an existing resource")
+        }
+
+        return resource
     }
 }
