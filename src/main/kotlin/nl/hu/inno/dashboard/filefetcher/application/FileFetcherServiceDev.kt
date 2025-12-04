@@ -23,13 +23,12 @@ class FileFetcherServiceDev(
     override fun fetchDashboardHtml(instanceName: String, fullPath: String, role: String, email: String): Resource {
         /*
         TODO:
-        - remove admin role
         - make sure path filtering on /students/  and /general/ always goes well for teacher dashboard
         - separate functionality -> move logic to domain
         - ensure parity between dev and impl versions
         - figure out if dev/prod profiles work on domain somehow?
         - consolidate functions in `when` where possible and replace final `else` with an exception
-        - create constants to use instead of hardcoding strings (see if they can be maintained outside the implementation to prevent duplication
+        - move constants outside of class specific companion object depending on how the spring profiles will end up working for local/prod
         -
         - look into difference between current implementation and using rest templates -> which is better in our use-case?
         - add necessary exceptions if fetch fails -> especially important if using rest template and get != status 200
@@ -48,7 +47,7 @@ class FileFetcherServiceDev(
         val baseUrlWithInstance = "$baseUrl/$instanceName/dashboard_$instanceName"
         
         val path = when (role) {
-            "ADMIN", "TEACHER" -> when {
+            ROLE_TEACHER -> when {
 
                 fullPath.contains("/students/") -> {
                     println("ran /students/ if")
@@ -79,7 +78,7 @@ class FileFetcherServiceDev(
                     baseUrl
                 }
             }
-            "STUDENT" -> {
+            ROLE_STUDENT -> {
                 val firstPartEmail = email.substringBefore("@")
                 "${baseUrl}/${instanceName}/dashboard_${instanceName}/${instanceName}/students/${firstPartEmail}_index.html"
 
@@ -89,5 +88,9 @@ class FileFetcherServiceDev(
         println("Final path: $path")
         println("_____")
         return UrlResource(URI.create(path))
+    }
+    companion object {
+        private const val ROLE_TEACHER = "TEACHER"
+        private const val ROLE_STUDENT = "STUDENT"
     }
 }
