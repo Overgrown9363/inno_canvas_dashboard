@@ -1,8 +1,8 @@
 package nl.hu.inno.dashboard.fileparser.domain
 
 import nl.hu.inno.dashboard.Fixture
-import nl.hu.inno.dashboard.fileparser.domain.exception.EmptyFileException
-import nl.hu.inno.dashboard.fileparser.domain.exception.FileCannotBeReadException
+import nl.hu.inno.dashboard.exception.exceptions.EmptyFileException
+import nl.hu.inno.dashboard.exception.exceptions.FileCannotBeReadException
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -92,6 +92,19 @@ class CsvFileParserTest {
             parser.parse(mockResource)
         }
         val expectedMessage = "File cannot be read"
+        assertEquals(expectedMessage, actualException.message)
+    }
+
+    @Test
+    fun parse_throwsException_forNonExistentResource() {
+        val mockResource = Mockito.mock(Resource::class.java)
+        Mockito.`when`(mockResource.exists()).thenReturn(false)
+        Mockito.`when`(mockResource.contentLength()).thenReturn(123L)
+
+        val actualException = assertThrows(EmptyFileException::class.java) {
+            parser.parse(mockResource)
+        }
+        val expectedMessage = "File is empty or does not exist"
         assertEquals(expectedMessage, actualException.message)
     }
 }

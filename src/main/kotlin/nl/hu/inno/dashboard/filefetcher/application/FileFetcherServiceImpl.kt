@@ -1,6 +1,7 @@
 package nl.hu.inno.dashboard.filefetcher.application
 
-import nl.hu.inno.dashboard.filefetcher.domain.exception.InvalidRoleException
+import nl.hu.inno.dashboard.exception.exceptions.InvalidPathException
+import nl.hu.inno.dashboard.filefetcher.domain.HtmlPathResolver
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.core.io.Resource
@@ -20,18 +21,18 @@ class FileFetcherServiceImpl(
         return UrlResource(URI.create(path))
     }
 
-    override fun fetchDashboardHtml(instanceName: String, role: String, email: String): Resource {
-        val path = when (role) {
-            "ADMIN", "TEACHER" -> {
-                "${baseUrl}/${instanceName}/dashboard_${instanceName}/index.html"
-            }
-            "STUDENT" -> {
-                val firstPartEmail = email.substringBefore("@")
-                "${baseUrl}/${instanceName}/dashboard_${instanceName}/${instanceName}/students/${firstPartEmail}_index.html"
+    override fun fetchDashboardHtml(email: String, role : String, instanceName: String, relativeRequestPath: String): Resource {
+        val courseCode = instanceName.substringBefore("_")
 
-            }
-            else -> throw InvalidRoleException("Role '$role' is not a valid role")
+        val baseUrlWithInstance = "$baseUrl/$courseCode/$instanceName/dashboard"
+        val resolvedPath = HtmlPathResolver.resolvePath(email, role, instanceName, relativeRequestPath)
+        val fullPath = "$baseUrlWithInstance/$resolvedPath"
+
+        val resource = UrlResource(URI.create(fullPath))
+        if (!resource.exists()) {
+            throw InvalidPathException("Path $resolvedPath did not lead to an existing resource")
         }
-        return UrlResource(URI.create(path))
+
+        return resource
     }
 }

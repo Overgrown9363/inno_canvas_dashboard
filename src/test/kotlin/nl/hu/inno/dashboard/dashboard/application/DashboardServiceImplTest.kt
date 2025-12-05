@@ -6,7 +6,8 @@ import nl.hu.inno.dashboard.dashboard.data.UsersRepository
 import nl.hu.inno.dashboard.dashboard.domain.Course
 import nl.hu.inno.dashboard.dashboard.domain.Role
 import nl.hu.inno.dashboard.dashboard.domain.Users
-import nl.hu.inno.dashboard.dashboard.domain.exception.UserNotFoundException
+import nl.hu.inno.dashboard.exception.exceptions.UserNotFoundException
+import nl.hu.inno.dashboard.exception.exceptions.UserNotInCourseException
 import nl.hu.inno.dashboard.filefetcher.application.FileFetcherService
 import nl.hu.inno.dashboard.fileparser.application.FileParserService
 import org.junit.jupiter.api.*
@@ -14,6 +15,7 @@ import org.mockito.ArgumentMatchers.anyList
 import org.mockito.ArgumentMatchers.argThat
 import org.mockito.Mockito.*
 import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.Resource
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
@@ -56,6 +58,9 @@ class DashboardServiceImplTest {
             ),
             listOf(
                 "9999", "Test cursus - September 2010", "TEST-9999_SEP25", "2010-09-01 00:00:00+02:00", "2011-01-30 23:59:59+01:00", "Test User", "test.user@student.hu.nl", "STUDENT"
+            ),
+            listOf(
+                "50304", "Innovation Semester - September 2025", "TICT-V3SE6-25_SEP25", "2025-09-01 00:00:00+02:00", "2026-01-30 23:59:59+01:00", "Blank User", "", "STUDENT"
             )
         )
 
@@ -71,6 +76,7 @@ class DashboardServiceImplTest {
     fun findUserByEmail_returnsUsersDTO_whenUserExists() {
         val user = Users.of("john.doe@student.hu.nl", "John Doe", Role.STUDENT)
         `when`(usersDB.findById("john.doe@student.hu.nl")).thenReturn(Optional.of(user))
+
         val actualDTO = service.findUserByEmail("john.doe@student.hu.nl")
 
         assertNotNull(actualDTO)
@@ -86,6 +92,45 @@ class DashboardServiceImplTest {
             service.findUserByEmail("not.exists@hu.nl")
         }
         assertEquals("User with email not.exists@hu.nl not found", exception.message)
+    }
+
+    @Test
+    fun getDashboardHtml_returnsResource_whenUserInCourse() {
+        val user = Users.of("john.doe@student.hu.nl", "John Doe", Role.STUDENT)
+        val course = Course.of(50304, "Innovation Semester - September 2025", "TICT-V3SE6-25_SEP25", LocalDate.parse("2025-09-01"), LocalDate.parse("2026-01-30"))
+        user.linkWithCourse(course)
+        `when`(usersDB.findById("john.doe@student.hu.nl")).thenReturn(Optional.of(user))
+        val expectedResult = mock(Resource::class.java)
+        `when`(fileFetcherService.fetchDashboardHtml("john.doe@student.hu.nl", "STUDENT", "TICT-V3SE6-25_SEP25", "/dashboard")).thenReturn(expectedResult)
+
+        val actualResult = service.getDashboardHtml("john.doe@student.hu.nl", "TICT-V3SE6-25_SEP25", "/dashboard")
+
+        assertEquals(expectedResult, actualResult)
+    }
+
+    @Test
+    fun getDashboardHtml_throwsUserNotInCourseException_whenUserNotInCourse() {
+        val user = Users.of("john.doe@student.hu.nl", "John Doe", Role.STUDENT)
+        `when`(usersDB.findById("john.doe@student.hu.nl")).thenReturn(Optional.of(user))
+
+        val actualMessage = assertThrows<UserNotInCourseException> {
+            service.getDashboardHtml("john.doe@student.hu.nl", "SOME_OTHER_INSTANCE", "/dashboard")
+        }
+
+        val expectedMessage = "User with email john.doe@student.hu.nl is not in a course with instanceName SOME_OTHER_INSTANCE"
+        assertEquals(expectedMessage, actualMessage.message)
+    }
+
+    @Test
+    fun getDashboardHtml_throwsUserNotFoundException_whenUserDoesNotExist() {
+        `when`(usersDB.findById("not.exists@hu.nl")).thenReturn(Optional.empty())
+
+        val actualMessage = assertThrows<UserNotFoundException> {
+            service.getDashboardHtml("not.exists@hu.nl", "TICT-V3SE6-25_SEP25", "/dashboard")
+        }
+
+        val expectedMessage = "User with email not.exists@hu.nl not found"
+        assertEquals(expectedMessage, actualMessage.message)
     }
 
     @Test

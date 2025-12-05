@@ -3,10 +3,12 @@ package nl.hu.inno.dashboard.dashboard.presentation
 import com.fasterxml.jackson.databind.ObjectMapper
 import nl.hu.inno.dashboard.dashboard.application.DashboardServiceImpl
 import nl.hu.inno.dashboard.dashboard.application.dto.UsersDTO
-import nl.hu.inno.dashboard.dashboard.domain.exception.UserNotFoundException
+import nl.hu.inno.dashboard.exception.exceptions.UserNotFoundException
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.Resource
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*
@@ -68,6 +70,51 @@ class DashboardControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun getDashboard_returnsResource_whenEmailPresent() {
+        val instanceName = "testInstance"
+        val email = "john.doe@student.hu.nl"
+        val relativeRequestPath = "$instanceName/dashboard"
+        val expectedResource = ByteArrayResource("html".toByteArray())
+        `when`(service.getDashboardHtml(email, instanceName, relativeRequestPath)).thenReturn(expectedResource)
+
+        mockMvc.perform(
+            get("/api/v1/dashboard/$relativeRequestPath")
+                .with(oauth2Login().attributes { it["email"] = email })
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        )
+            .andExpect(status().isOk)
+            .andExpect { result ->
+                assert(result.response.contentAsByteArray.contentEquals("html".toByteArray()))
+            }
+    }
+
+    @Test
+    fun getDashboard_returnsUnauthorized_whenEmailMissing() {
+        val instanceName = "testInstance"
+        val relativeRequestPath = "$instanceName/dashboard"
+
+        mockMvc.perform(
+            get("/api/v1/dashboard/$relativeRequestPath")
+                .with(oauth2Login().attributes { }) // geen email
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        )
+            .andExpect(status().isUnauthorized)
+    }
+
+    @Test
+    fun getDashboard_returnsUnauthorized_whenEmailIsBlank() {
+        val instanceName = "testInstance"
+        val relativeRequestPath = "$instanceName/dashboard"
+
+        mockMvc.perform(
+            get("/api/v1/dashboard/$relativeRequestPath")
+                .with(oauth2Login().attributes { it["email"] = "" })
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        )
+            .andExpect(status().isUnauthorized)
     }
 
     @Test
