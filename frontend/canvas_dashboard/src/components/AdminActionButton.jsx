@@ -1,6 +1,8 @@
+import "../css/admin-button.css";
+
 function AdminActionButton({ name, onClick, disabled }) {
   return (
-    <button onClick={onClick} disabled={disabled}>
+    <button class="admin-button" onClick={onClick} disabled={disabled}>
       {name}
     </button>
   );

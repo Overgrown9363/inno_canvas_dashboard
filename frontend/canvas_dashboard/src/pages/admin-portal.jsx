@@ -3,7 +3,7 @@ import { getUserData } from "../api/getUserData.js";
 import AdminActionButton from "../components/AdminActionButton";
 import UserInfo from "../components/UserInformation";
 import useAuthCheck from "../hooks/useAuthCheck";
-import "../css/admin-button-group.css";
+import "../css/admin-button.css";
 
 const AdminDashboard = () => {
     useAuthCheck();
@@ -32,7 +32,7 @@ const AdminDashboard = () => {
     return (
         <div>
             <UserInfo data={userData} />
-              <div class="button-group">
+              <div class="admin-button-group">
                 <AdminActionButton name="Genereer Resultaat"></AdminActionButton>
                 <AdminActionButton name="Genereer Cursus"></AdminActionButton>
                 <AdminActionButton name="Update Cursus" disabled={true}></AdminActionButton>
