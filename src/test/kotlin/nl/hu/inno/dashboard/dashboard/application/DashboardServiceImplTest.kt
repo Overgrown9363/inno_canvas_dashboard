@@ -4,7 +4,7 @@ import nl.hu.inno.dashboard.dashboard.application.dto.UsersDTO
 import nl.hu.inno.dashboard.dashboard.data.CourseRepository
 import nl.hu.inno.dashboard.dashboard.data.UsersRepository
 import nl.hu.inno.dashboard.dashboard.domain.Course
-import nl.hu.inno.dashboard.dashboard.domain.Role
+import nl.hu.inno.dashboard.dashboard.domain.Privileges
 import nl.hu.inno.dashboard.dashboard.domain.Users
 import nl.hu.inno.dashboard.exception.exceptions.UserNotFoundException
 import nl.hu.inno.dashboard.exception.exceptions.UserNotInCourseException
@@ -74,7 +74,7 @@ class DashboardServiceImplTest {
 
     @Test
     fun findUserByEmail_returnsUsersDTO_whenUserExists() {
-        val user = Users.of("john.doe@student.hu.nl", "John Doe", Role.STUDENT)
+        val user = Users.of("john.doe@student.hu.nl", "John Doe", Privileges.STUDENT)
         `when`(usersDB.findById("john.doe@student.hu.nl")).thenReturn(Optional.of(user))
 
         val actualDTO = service.findUserByEmail("john.doe@student.hu.nl")
@@ -96,7 +96,7 @@ class DashboardServiceImplTest {
 
     @Test
     fun getDashboardHtml_returnsResource_whenUserInCourse() {
-        val user = Users.of("john.doe@student.hu.nl", "John Doe", Role.STUDENT)
+        val user = Users.of("john.doe@student.hu.nl", "John Doe", Privileges.STUDENT)
         val course = Course.of(50304, "Innovation Semester - September 2025", "TICT-V3SE6-25_SEP25", LocalDate.parse("2025-09-01"), LocalDate.parse("2026-01-30"))
         user.linkWithCourse(course)
         `when`(usersDB.findById("john.doe@student.hu.nl")).thenReturn(Optional.of(user))
@@ -110,7 +110,7 @@ class DashboardServiceImplTest {
 
     @Test
     fun getDashboardHtml_throwsUserNotInCourseException_whenUserNotInCourse() {
-        val user = Users.of("john.doe@student.hu.nl", "John Doe", Role.STUDENT)
+        val user = Users.of("john.doe@student.hu.nl", "John Doe", Privileges.STUDENT)
         `when`(usersDB.findById("john.doe@student.hu.nl")).thenReturn(Optional.of(user))
 
         val actualMessage = assertThrows<UserNotInCourseException> {
