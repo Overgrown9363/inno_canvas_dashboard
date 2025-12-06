@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import { getUserData } from "../api/getUserData.js";
 import AdminActionButton from "../components/AdminActionButton";
 import UserInfo from "../components/UserInformation";
@@ -28,6 +29,10 @@ const AdminDashboard = () => {
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error loading user data.</div>;
+  
+  if (!userData || userData.role !== "ADMIN") {
+    return <Navigate to="/" replace />;
+  }
 
   function handleHealth() {
     fetch("/api/health", {
@@ -86,7 +91,7 @@ const AdminDashboard = () => {
           name="Genereer Resultaat"
           onClick={handleGenerateResult}
         ></AdminActionButton>
-        
+
         <AdminActionButton
           name="Genereer Cursus"
           onClick={handleGenerateCourse}
