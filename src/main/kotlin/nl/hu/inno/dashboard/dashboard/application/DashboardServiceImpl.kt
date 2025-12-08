@@ -34,6 +34,16 @@ class DashboardServiceImpl(
         return UsersDTO.of(user)
     }
 
+    /*
+TODO:
+- fix tests
+- improve current service to keep it clean
+- look into reduction of ?. calls (here and in dtos etc)
+- look into file fetcher component to make it more robust with new changes possibly?
+- reduce the duplicate code line in dev and impl versions of filefetcher
+- consider moving linkWithCourse function from User class to UserInCourse class to reduce complexity
+ */
+
     override fun getDashboardHtml(email: String, instanceName: String, relativeRequestPath: String): Resource {
         val user = findUserInDatabaseByEmail(email)
 
@@ -89,7 +99,7 @@ class DashboardServiceImpl(
             val user = usersCache.getOrPut(email) { convertToUser(record) }
             val course = courseCache.getOrPut(canvasCourseId) { convertToCourse(record) }
 
-            val link = user.linkWithCourse(course, parseCourseRole(courseRole))
+            val link = UserInCourse.createAndLink(user, course, parseCourseRole(courseRole))
             userInCourseList.add(link)
         }
     }

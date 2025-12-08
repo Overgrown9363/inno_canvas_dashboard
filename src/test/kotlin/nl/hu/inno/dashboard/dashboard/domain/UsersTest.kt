@@ -50,27 +50,4 @@ class UsersTest {
 
         assertFalse(user.equals("a@hu.nl"))
     }
-
-//    @Test
-//    fun linkWithCourse_linksBothSides() {
-//        val user = Users.of("x@hu.nl", "X")
-//        val course = Course.of(42, "C", "I", LocalDate.MIN, LocalDate.MIN)
-//
-//        user.linkWithCourse(course)
-//
-//        assertTrue(user.courses.contains(course))
-//        assertTrue(course.users.contains(user))
-//    }
-//
-//    @Test
-//    fun linkWithCourse_doesNotDuplicateLinks() {
-//        val user = Users.of("x@hu.nl", "X")
-//        val course = Course.of(42, "C", "I", LocalDate.MIN, LocalDate.MIN)
-//
-//        user.linkWithCourse(course)
-//        user.linkWithCourse(course)
-//
-//        assertEquals(1, user.courses.size)
-//        assertEquals(1, course.users.size)
-//    }
 }

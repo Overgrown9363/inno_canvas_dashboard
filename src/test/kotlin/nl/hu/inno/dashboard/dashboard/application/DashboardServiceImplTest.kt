@@ -7,6 +7,7 @@ import nl.hu.inno.dashboard.dashboard.data.UsersRepository
 import nl.hu.inno.dashboard.dashboard.domain.Course
 import nl.hu.inno.dashboard.dashboard.domain.CourseRole
 import nl.hu.inno.dashboard.dashboard.domain.Privileges
+import nl.hu.inno.dashboard.dashboard.domain.UserInCourse
 import nl.hu.inno.dashboard.dashboard.domain.Users
 import nl.hu.inno.dashboard.exception.exceptions.UserNotFoundException
 import nl.hu.inno.dashboard.exception.exceptions.UserNotInCourseException
@@ -102,7 +103,7 @@ class DashboardServiceImplTest {
     fun getDashboardHtml_returnsResource_whenUserInCourse() {
         val user = Users.of("john.doe@student.hu.nl", "John Doe")
         val course = Course.of(50304, "Innovation Semester - September 2025", "TICT-V3SE6-25", "TICT-V3SE6-25_SEP25", LocalDate.parse("2025-09-01"), LocalDate.parse("2026-01-30"))
-        user.linkWithCourse(course, CourseRole.valueOf("STUDENT"))
+        UserInCourse.createAndLink(user, course, CourseRole.valueOf("STUDENT"))
         `when`(usersDB.findById("john.doe@student.hu.nl")).thenReturn(Optional.of(user))
         val expectedResult = mock(Resource::class.java)
         `when`(fileFetcherService.fetchDashboardHtml("john.doe@student.hu.nl", "STUDENT", "TICT-V3SE6-25", "TICT-V3SE6-25_SEP25", "/dashboard")).thenReturn(expectedResult)

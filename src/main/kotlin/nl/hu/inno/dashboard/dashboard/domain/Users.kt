@@ -25,14 +25,6 @@ class Users (
         }
     }
 
-    fun linkWithCourse(course: Course, courseRole: CourseRole) : UserInCourse {
-        val link = UserInCourse(user = this, course = course, courseRole = courseRole)
-        this.userInCourse.add(link)
-        course.userInCourse.add(link)
-
-        return link
-    }
-
     override fun equals(other: Any?): Boolean =
         this === other || (other is Users && email == other.email)
 

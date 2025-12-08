@@ -22,4 +22,13 @@ class UserInCourse (
     val courseRole: CourseRole? = null,
 ) {
     constructor() : this(0, null, null, null)
+
+    companion object {
+        fun createAndLink(user: Users, course: Course, courseRole: CourseRole): UserInCourse {
+            val link = UserInCourse(user = user, course = course, courseRole = courseRole)
+            user.userInCourse.add(link)
+            course.userInCourse.add(link)
+            return link
+        }
+    }
 }
