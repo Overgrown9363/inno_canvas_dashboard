@@ -2,7 +2,9 @@ package nl.hu.inno.dashboard.dashboard.presentation
 
 import jakarta.servlet.http.HttpServletRequest
 import nl.hu.inno.dashboard.dashboard.application.DashboardServiceImpl
+import nl.hu.inno.dashboard.dashboard.application.dto.StaffDTO
 import nl.hu.inno.dashboard.dashboard.application.dto.UsersDTO
+import nl.hu.inno.dashboard.dashboard.presentation.dto.UserPutRequest
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -28,13 +30,25 @@ class DashboardController(
     }
 
     @GetMapping("/users/admin")
-    fun getAllAdminUsers(@AuthenticationPrincipal user: OAuth2User): ResponseEntity<List<UsersDTO>> {
+    fun getAllAdminUsers(@AuthenticationPrincipal user: OAuth2User): ResponseEntity<List<StaffDTO>> {
         val email = user.attributes["email"] as? String
         if (email.isNullOrBlank()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
 
         val userDTO = service.findAllAdmins(email)
+        return ResponseEntity.ok(userDTO)
+    }
+
+    @PutMapping("/users/admin")
+    fun updateAdminRoles(@AuthenticationPrincipal user: OAuth2User, @RequestBody updatedUsers: List<UserPutRequest>): ResponseEntity<List<StaffDTO>> {
+        val email = user.attributes["email"] as? String
+        if (email.isNullOrBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
+
+        val usersToUpdate = updatedUsers.map { StaffDTO(it.email, it.name, it.appRole) }
+        val userDTO = service.updateAdminUsers(email, usersToUpdate)
         return ResponseEntity.ok(userDTO)
     }
 
