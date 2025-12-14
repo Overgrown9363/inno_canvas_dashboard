@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { getUserData } from "../api/getUserData.js";
+import { getStaffUsers } from "../api/getStaffUsers.js";
 import AdminActionButton from "../components/AdminActionButton";
 import UserInfo from "../components/UserInformation";
 import useAuthCheck from "../hooks/useAuthCheck";
@@ -12,6 +13,10 @@ const AdminDashboard = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [staffUsers, setStaffUsers] = useState([]);
+  const [staffLoading, setStaffLoading] = useState(false);
+  const [staffError, setStaffError] = useState(null);
 
   useEffect(() => {
     async function loadData() {
@@ -27,12 +32,33 @@ const AdminDashboard = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (userData && userData.role === "SUPERADMIN") {
+        setStaffLoading(true);
+        async function loadStaff() {
+        try {
+            const data = await getStaffUsers();
+
+            // sort users by role first and then by name
+            const sortedUsers = [...data].sort((a, b) => {
+            if (a.role !== b.role) return a.role.localeCompare(b.role);
+            return a.name.localeCompare(b.name);
+            });
+            setStaffUsers(sortedUsers);
+        } catch (err) {
+            setStaffError(err.message);
+        } finally {
+            setStaffLoading(false);
+        }
+        }
+        loadStaff();
+    }
+  }, [userData]);
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error loading user data.</div>;
-  
-  if (!userData || (userData.role !== "ADMIN" && userData.role !== "SUPERADMIN")) {
-    return <Navigate to="/" replace />;
-  }
+  if (!userData) return <Navigate to="/" replace />;
+  if (userData.role !== "ADMIN" && userData.role !== "SUPERADMIN") return <Navigate to="/" replace />;
 
   function handleHealth() {
     fetch("/api/health", {
@@ -110,6 +136,28 @@ const AdminDashboard = () => {
       {userData.role === "SUPERADMIN" && (
         <div className="admin-management-group">
           <h2>Beheer Gebruikers</h2>
+          {staffLoading && <div>Loading staff users...</div>}
+          {staffError && <div>Error: {staffError}</div>}
+          {!staffLoading && !staffError && (
+            <table>
+              <thead>
+                <tr>
+                  <th>Naam</th>
+                  <th>Email</th>
+                  <th>Rol</th>
+                </tr>
+              </thead>
+              <tbody>
+                {staffUsers.map((user) => (
+                  <tr key={user.email}>
+                    <td>{user.name}</td>
+                    <td>{user.email}</td>
+                    <td>{user.role}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
     </div>
