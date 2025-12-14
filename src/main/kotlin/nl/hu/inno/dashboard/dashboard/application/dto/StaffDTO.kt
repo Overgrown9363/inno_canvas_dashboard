@@ -12,7 +12,7 @@ val appRole: String,
             return StaffDTO(
                 email = user.email,
                 name = user.name,
-                appRole = user.privilege.name,
+                appRole = user.appRole.name,
             )
         }
     }

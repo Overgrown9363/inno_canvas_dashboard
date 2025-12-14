@@ -13,7 +13,7 @@ data class UsersDTO (
             return UsersDTO(
                 email = user.email,
                 name = user.name,
-                role = user.privilege.name,
+                role = user.appRole.name,
                 courses = user.userInCourse
                     .mapNotNull {
                         val course = it.course

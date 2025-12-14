@@ -11,7 +11,7 @@ class UsersTest {
 
         assertEquals("test@hu.nl", user.email)
         assertEquals("Name", user.name)
-        assertEquals(Privilege.USER, user.privilege)
+        assertEquals(AppRole.USER, user.appRole)
         assertTrue(user.userInCourse.isEmpty())
     }
 
@@ -21,7 +21,7 @@ class UsersTest {
 
         assertEquals("", user.email)
         assertEquals("", user.name)
-        assertEquals(Privilege.USER, user.privilege)
+        assertEquals(AppRole.USER, user.appRole)
         assertTrue(user.userInCourse.isEmpty())
     }
 

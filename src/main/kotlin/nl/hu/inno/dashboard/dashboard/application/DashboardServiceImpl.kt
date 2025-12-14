@@ -7,7 +7,7 @@ import nl.hu.inno.dashboard.dashboard.data.UserInCourseRepository
 import nl.hu.inno.dashboard.dashboard.data.UsersRepository
 import nl.hu.inno.dashboard.dashboard.domain.Course
 import nl.hu.inno.dashboard.dashboard.domain.CourseRole
-import nl.hu.inno.dashboard.dashboard.domain.Privilege
+import nl.hu.inno.dashboard.dashboard.domain.AppRole
 import nl.hu.inno.dashboard.dashboard.domain.UserInCourse
 import nl.hu.inno.dashboard.dashboard.domain.Users
 import nl.hu.inno.dashboard.exception.exceptions.CourseNotFoundException
@@ -39,7 +39,7 @@ class DashboardServiceImpl(
 
     override fun findAllAdmins(email: String): List<StaffDTO> {
         val requestUser = findUserInDatabaseByEmail(email)
-        if (requestUser.privilege == Privilege.USER) {
+        if (requestUser.appRole == AppRole.USER) {
             throw UserNotAuthorizedException("User with $email does not have the authorization to make this request")
         }
 
@@ -51,7 +51,7 @@ class DashboardServiceImpl(
 
     override fun updateAdminUsers(email: String, usersToUpdate: List<StaffDTO>): List<StaffDTO> {
         val requestUser = findUserInDatabaseByEmail(email)
-        if (requestUser.privilege == Privilege.USER) {
+        if (requestUser.appRole == AppRole.USER) {
             throw UserNotAuthorizedException("User with $email does not have the authorization to make this request")
         }
 
@@ -60,16 +60,16 @@ class DashboardServiceImpl(
         for (changedUser in usersToUpdate) {
             val user = findUserInDatabaseByEmail(email)
 
-            if (user.privilege == Privilege.SUPERADMIN) continue
+            if (user.appRole == AppRole.SUPERADMIN) continue
 
-            val newPrivilege = when (changedUser.appRole) {
-                "USER" -> Privilege.USER
-                "ADMIN" -> Privilege.ADMIN
-                else -> user.privilege
+            val newAppRole = when (changedUser.appRole) {
+                "USER" -> AppRole.USER
+                "ADMIN" -> AppRole.ADMIN
+                else -> user.appRole
             }
 
-            if (user.privilege != newPrivilege) {
-                user.privilege = newPrivilege
+            if (user.appRole != newAppRole) {
+                user.appRole = newAppRole
                 usersDB.save(user)
                 updatedUserList.add(user)
             }
@@ -101,7 +101,7 @@ class DashboardServiceImpl(
 
         userInCourseDB.deleteAll()
         courseDB.deleteAll()
-        usersDB.deleteAllByPrivilege(Privilege.USER)
+        usersDB.deleteAllByAppRole(AppRole.USER)
 
         val managedCourses = courseDB.saveAll(courseCache.values).associateBy { it.canvasCourseId }
         val managedUsers = usersDB.saveAll(usersCache.values).associateBy { it.email }
