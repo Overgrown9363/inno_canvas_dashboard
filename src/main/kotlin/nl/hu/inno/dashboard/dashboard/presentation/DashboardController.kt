@@ -27,6 +27,17 @@ class DashboardController(
         return ResponseEntity.ok(userDTO)
     }
 
+    @GetMapping("/users/staff")
+    fun getAllStaffUsers(@AuthenticationPrincipal user: OAuth2User): ResponseEntity<List<UsersDTO>> {
+        val email = user.attributes["email"] as? String
+        if (email.isNullOrBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
+
+        val userDTO = service.findAllStaff(email)
+        return ResponseEntity.ok(userDTO)
+    }
+
     @GetMapping(("/{instanceName}/**"))
     fun getDashboard(@PathVariable instanceName: String, @AuthenticationPrincipal user: OAuth2User, request: HttpServletRequest): ResponseEntity<Resource> {
         val relativeRequestPath = request.requestURI.removePrefix("/api/v1/dashboard/")
