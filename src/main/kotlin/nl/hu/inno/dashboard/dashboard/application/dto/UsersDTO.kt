@@ -14,7 +14,6 @@ data class UsersDTO (
                 email = user.email,
                 name = user.name,
                 role = user.privilege.name,
-//                courses = user.userInCourse.map { CourseDTO.of(it.course) }
                 courses = user.userInCourse
                     .mapNotNull {
                         val course = it.course
