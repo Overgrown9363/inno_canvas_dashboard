@@ -1,32 +1,141 @@
-function AdminManagementTable({
-    adminUsers,
-    adminLoading,
-    adminError,
-}) {
+import { useState, useEffect } from "react";
+import { updateAdminUsers } from "../api/updateAdminUsers.js";
+import { getAdminUsers } from "../api/getAdminUsers.js";
+import "../css/admin-management.css";
+
+const ROLE_OPTIONS = ["USER", "ADMIN", "SUPERADMIN"];
+
+function AdminManagementTable() {
+    const [adminUsers, setAdminUsers] = useState([]);
+    const [adminLoading, setAdminLoading] = useState(true);
+    const [adminError, setAdminError] = useState(null);
+
+    const [editedUsers, setEditedUsers] = useState({});
+    const [localUsers, setLocalUsers] = useState([]);
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    async function fetchUsers() {
+        setAdminLoading(true);
+        setAdminError(null);
+        try {
+            const data = await getAdminUsers();
+            
+            // sort users first by role then by name
+            const sorted = [...data].sort((a, b) => {
+                if (a.role !== b.role) return a.role.localeCompare(b.role);
+                return a.name.localeCompare(b.name);
+            });
+            setAdminUsers(sorted);
+            setLocalUsers(sorted);
+            setEditedUsers({});
+        } catch (err) {
+            setAdminError(err.message);
+        } finally {
+            setAdminLoading(false);
+        }
+    }
+
+    const handleRoleChange = (email, newRole) => {
+        setLocalUsers((prev) =>
+            prev.map((user) =>
+                user.email === email ? { ...user, role: newRole } : user
+            )
+        );
+        setEditedUsers((prev) => ({
+            ...prev,
+            [email]: newRole,
+        }));
+    };
+
+    const handleSave = async () => {
+        const changed = localUsers.filter(
+            (user) => editedUsers[user.email] && user.role !== adminUsers.find(u => u.email === user.email).role
+        );
+        if (changed.length === 0) return;
+        setSaving(true);
+        try {
+            await updateAdminUsers(changed);
+
+            // renew user list after updating roles
+            await fetchUsers();
+            alert("Rollen succesvol bijgewerkt!");
+        } catch (err) {
+            alert("Fout bij opslaan: " + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     return (
         <div className="admin-management-group">
             <h2>Beheer Gebruikers</h2>
             {adminLoading && <div>Loading admin users...</div>}
             {adminError && <div>Error: {adminError}</div>}
             {!adminLoading && !adminError && (
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Naam</th>
-                            <th>Email</th>
-                            <th>Rol</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {adminUsers.map((user) => (
-                            <tr key={user.email}>
-                                <td>{user.name}</td>
-                                <td>{user.email}</td>
-                                <td>{user.role}</td>
+                <>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Naam</th>
+                                <th>Email</th>
+                                <th>Rol</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {localUsers.map((user) => {
+                                const isSuperadmin = user.role === "SUPERADMIN";
+                                const isChanged =
+                                    editedUsers[user.email] &&
+                                    user.role !== adminUsers.find(u => u.email === user.email).role;
+                                return (
+                                    <tr
+                                        key={user.email}
+                                        className={
+                                            (isChanged ? "row-changed " : "") +
+                                            (isSuperadmin ? "row-superadmin" : "")
+                                        }
+                                    >
+                                        <td>{user.name}</td>
+                                        <td>{user.email}</td>
+                                        <td>
+                                            <select
+                                                value={user.role}
+                                                disabled={isSuperadmin}
+                                                onChange={(e) =>
+                                                    handleRoleChange(
+                                                        user.email,
+                                                        e.target.value
+                                                    )
+                                                }
+                                            >
+                                                {ROLE_OPTIONS.filter(
+                                                    (role) =>
+                                                        role !== "SUPERADMIN" ||
+                                                        user.role === "SUPERADMIN"
+                                                ).map((role) => (
+                                                    <option key={role} value={role}>
+                                                        {role}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                    <button
+                        onClick={handleSave}
+                        disabled={Object.keys(editedUsers).length === 0 || saving}
+                        className="save-button"
+                    >
+                        {saving ? "Opslaan..." : "Opslaan"}
+                    </button>
+                </>
             )}
         </div>
     );

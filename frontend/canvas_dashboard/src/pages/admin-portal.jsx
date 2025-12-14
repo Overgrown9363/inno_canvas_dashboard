@@ -15,10 +15,6 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [adminUsers, setAdminUsers] = useState([]);
-  const [adminLoading, setAdminLoading] = useState(false);
-  const [adminError, setAdminError] = useState(null);
-
   useEffect(() => {
     async function loadData() {
       try {
@@ -32,29 +28,6 @@ const AdminDashboard = () => {
     }
     loadData();
   }, []);
-
-  useEffect(() => {
-    if (userData && userData.role === "SUPERADMIN") {
-        setAdminLoading(true);
-        async function loadAdmins() {
-        try {
-            const data = await getAdminUsers();
-
-            // sort users by role first and then by name
-            const sortedUsers = [...data].sort((a, b) => {
-            if (a.role !== b.role) return a.role.localeCompare(b.role);
-            return a.name.localeCompare(b.name);
-            });
-            setAdminUsers(sortedUsers);
-        } catch (err) {
-            setAdminError(err.message);
-        } finally {
-            setAdminLoading(false);
-        }
-        }
-        loadAdmins();
-    }
-  }, [userData]);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error loading user data.</div>;
@@ -135,11 +108,7 @@ const AdminDashboard = () => {
         ></AdminActionButton>
       </div>
       {userData.role === "SUPERADMIN" && (
-        <AdminManagementTable
-            adminUsers={adminUsers}
-            adminLoading={adminLoading}
-            adminError={adminError}
-        />
+        <AdminManagementTable />
       )}
     </div>
   );
