@@ -30,7 +30,7 @@ const AdminDashboard = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error loading user data.</div>;
   
-  if (!userData || userData.role !== "ADMIN") {
+  if (!userData || (userData.role !== "ADMIN" && userData.role !== "SUPERADMIN")) {
     return <Navigate to="/" replace />;
   }
 
@@ -107,6 +107,11 @@ const AdminDashboard = () => {
           onClick={handleHealth}
         ></AdminActionButton>
       </div>
+      {userData.role === "SUPERADMIN" && (
+        <div className="admin-management-group">
+          <h2>Beheer Gebruikers</h2>
+        </div>
+      )}
     </div>
   );
 };

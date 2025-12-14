@@ -18,7 +18,7 @@ function NavBar({ userRole }) {
         <li>
           <Link to="/course-overview">Cursus Overzicht</Link>
         </li>
-        {userRole === "ADMIN" && (
+        {userRole === "ADMIN" || userRole ==="SUPERADMIN" && (
           <li>
             <Link to="/admin-portal">Admin Portal</Link>
           </li>
