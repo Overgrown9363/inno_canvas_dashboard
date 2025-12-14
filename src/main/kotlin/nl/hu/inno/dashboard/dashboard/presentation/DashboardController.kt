@@ -27,14 +27,14 @@ class DashboardController(
         return ResponseEntity.ok(userDTO)
     }
 
-    @GetMapping("/users/staff")
-    fun getAllStaffUsers(@AuthenticationPrincipal user: OAuth2User): ResponseEntity<List<UsersDTO>> {
+    @GetMapping("/users/admin")
+    fun getAllAdminUsers(@AuthenticationPrincipal user: OAuth2User): ResponseEntity<List<UsersDTO>> {
         val email = user.attributes["email"] as? String
         if (email.isNullOrBlank()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
 
-        val userDTO = service.findAllStaff(email)
+        val userDTO = service.findAllAdmins(email)
         return ResponseEntity.ok(userDTO)
     }
 

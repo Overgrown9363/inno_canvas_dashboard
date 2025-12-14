@@ -36,16 +36,16 @@ class DashboardServiceImpl(
         return UsersDTO.of(user)
     }
 
-    override fun findAllStaff(email: String): List<UsersDTO> {
+    override fun findAllAdmins(email: String): List<UsersDTO> {
         val requestUser = findUserInDatabaseByEmail(email)
         if (requestUser.privilege == Privilege.USER) {
             throw UserNotAuthorizedException("User with $email does not have the authorization to make this request")
         }
 
-        val staffEmail = "@hu.nl"
-        val staffList = usersDB.findAllByEmailEndingWith(staffEmail)
+        val adminEmail = "@hu.nl"
+        val adminList = usersDB.findAllByEmailEndingWith(adminEmail)
 
-        return staffList.map { UsersDTO.of(it) }
+        return adminList.map { UsersDTO.of(it) }
     }
 
     override fun getDashboardHtml(email: String, instanceName: String, relativeRequestPath: String): Resource {

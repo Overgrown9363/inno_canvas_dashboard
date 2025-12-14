@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { getUserData } from "../api/getUserData.js";
-import { getStaffUsers } from "../api/getStaffUsers.js";
+import { getAdminUsers } from "../api/getAdminUsers.js";
 import AdminActionButton from "../components/AdminActionButton";
 import UserInfo from "../components/UserInformation";
 import useAuthCheck from "../hooks/useAuthCheck";
@@ -15,9 +15,9 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [staffUsers, setStaffUsers] = useState([]);
-  const [staffLoading, setStaffLoading] = useState(false);
-  const [staffError, setStaffError] = useState(null);
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [adminError, setAdminError] = useState(null);
 
   useEffect(() => {
     async function loadData() {
@@ -35,24 +35,24 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     if (userData && userData.role === "SUPERADMIN") {
-        setStaffLoading(true);
-        async function loadStaff() {
+        setAdminLoading(true);
+        async function loadAdmins() {
         try {
-            const data = await getStaffUsers();
+            const data = await getAdminUsers();
 
             // sort users by role first and then by name
             const sortedUsers = [...data].sort((a, b) => {
             if (a.role !== b.role) return a.role.localeCompare(b.role);
             return a.name.localeCompare(b.name);
             });
-            setStaffUsers(sortedUsers);
+            setAdminUsers(sortedUsers);
         } catch (err) {
-            setStaffError(err.message);
+            setAdminError(err.message);
         } finally {
-            setStaffLoading(false);
+            setAdminLoading(false);
         }
         }
-        loadStaff();
+        loadAdmins();
     }
   }, [userData]);
 
@@ -136,9 +136,9 @@ const AdminDashboard = () => {
       </div>
       {userData.role === "SUPERADMIN" && (
         <AdminManagementTable
-            staffUsers={staffUsers}
-            staffLoading={staffLoading}
-            staffError={staffError}
+            staffUsers={adminUsers}
+            staffLoading={adminLoading}
+            staffError={adminError}
         />
       )}
     </div>

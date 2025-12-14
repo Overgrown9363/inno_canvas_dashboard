@@ -1,5 +1,5 @@
-export async function getStaffUsers() {
-  const response = await fetch("/api/v1/dashboard/users/staff", {
+export async function getAdminUsers() {
+  const response = await fetch("/api/v1/dashboard/users/admin", {
     method: "GET",
     credentials: "include"
   });
