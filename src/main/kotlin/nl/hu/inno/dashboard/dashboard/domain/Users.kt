@@ -13,15 +13,15 @@ class Users (
     val name: String = "",
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "PRIVILEGES")
-    val privileges: Privileges = Privileges.USER,
+    @Column(name = "PRIVILEGE")
+    val privilege: Privilege = Privilege.USER,
 
     @OneToMany(mappedBy = "user")
     val userInCourse: MutableSet<UserInCourse> = mutableSetOf()
 ) {
     companion object {
         fun of(email: String, name: String): Users {
-            return Users(email.lowercase(), name, Privileges.USER)
+            return Users(email.lowercase(), name, Privilege.USER)
         }
     }
 

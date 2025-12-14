@@ -6,7 +6,6 @@ import nl.hu.inno.dashboard.dashboard.data.UserInCourseRepository
 import nl.hu.inno.dashboard.dashboard.data.UsersRepository
 import nl.hu.inno.dashboard.dashboard.domain.Course
 import nl.hu.inno.dashboard.dashboard.domain.CourseRole
-import nl.hu.inno.dashboard.dashboard.domain.Privileges
 import nl.hu.inno.dashboard.dashboard.domain.UserInCourse
 import nl.hu.inno.dashboard.dashboard.domain.Users
 import nl.hu.inno.dashboard.exception.exceptions.UserNotFoundException

@@ -2,7 +2,6 @@ package nl.hu.inno.dashboard.dashboard.domain
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class UsersTest {
 
@@ -12,7 +11,7 @@ class UsersTest {
 
         assertEquals("test@hu.nl", user.email)
         assertEquals("Name", user.name)
-        assertEquals(Privileges.USER, user.privileges)
+        assertEquals(Privilege.USER, user.privilege)
         assertTrue(user.userInCourse.isEmpty())
     }
 
@@ -22,7 +21,7 @@ class UsersTest {
 
         assertEquals("", user.email)
         assertEquals("", user.name)
-        assertEquals(Privileges.USER, user.privileges)
+        assertEquals(Privilege.USER, user.privilege)
         assertTrue(user.userInCourse.isEmpty())
     }
 

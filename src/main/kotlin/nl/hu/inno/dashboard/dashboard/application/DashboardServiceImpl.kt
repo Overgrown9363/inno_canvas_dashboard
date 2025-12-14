@@ -6,6 +6,7 @@ import nl.hu.inno.dashboard.dashboard.data.UserInCourseRepository
 import nl.hu.inno.dashboard.dashboard.data.UsersRepository
 import nl.hu.inno.dashboard.dashboard.domain.Course
 import nl.hu.inno.dashboard.dashboard.domain.CourseRole
+import nl.hu.inno.dashboard.dashboard.domain.Privilege
 import nl.hu.inno.dashboard.dashboard.domain.UserInCourse
 import nl.hu.inno.dashboard.dashboard.domain.Users
 import nl.hu.inno.dashboard.exception.exceptions.CourseNotFoundException
@@ -57,7 +58,7 @@ class DashboardServiceImpl(
 
         userInCourseDB.deleteAll()
         courseDB.deleteAll()
-        usersDB.deleteAll()
+        usersDB.deleteAllByPrivileges(Privilege.USER)
 
         val managedCourses = courseDB.saveAll(courseCache.values).associateBy { it.canvasCourseId }
         val managedUsers = usersDB.saveAll(usersCache.values).associateBy { it.email }
@@ -83,7 +84,9 @@ class DashboardServiceImpl(
             if (email.isBlank() || email.lowercase() == "null") continue
             val canvasCourseId = record[CsvColumns.CANVAS_COURSE_ID].toInt()
 
-            usersCache.getOrPut(email) { convertToUser(record) }
+            usersCache.getOrPut(email) {
+                usersDB.findByIdOrNull(email.lowercase()) ?: convertToUser(record)
+            }
             courseCache.getOrPut(canvasCourseId) { convertToCourse(record) }
         }
     }
