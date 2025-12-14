@@ -53,15 +53,16 @@ class DashboardServiceImpl(
 
         val usersCache = mutableMapOf<String, Users>()
         val courseCache = mutableMapOf<Int, Course>()
-        val userInCourseList = mutableListOf<UserInCourse>()
-        linkUsersAndCourses(records, usersCache, courseCache, userInCourseList)
+        buildUserAndCourseCache(records, usersCache, courseCache)
 
         userInCourseDB.deleteAll()
         courseDB.deleteAll()
         usersDB.deleteAll()
-        
-        courseDB.saveAll(courseCache.values)
-        usersDB.saveAll(usersCache.values)
+
+        val managedCourses = courseDB.saveAll(courseCache.values).associateBy { it.canvasCourseId }
+        val managedUsers = usersDB.saveAll(usersCache.values).associateBy { it.email }
+
+        val userInCourseList = linkUsersAndCourses(records, managedCourses, managedUsers)
         userInCourseDB.saveAll(userInCourseList)
     }
 
@@ -74,24 +75,41 @@ class DashboardServiceImpl(
         return user
     }
 
-    private fun linkUsersAndCourses(
+    private fun buildUserAndCourseCache(
         records: List<List<String>>,
         usersCache: MutableMap<String, Users>,
         courseCache: MutableMap<Int, Course>,
-        userInCourseList: MutableList<UserInCourse>
     ) {
         for (record in records) {
             val email = record[CsvColumns.USER_EMAIL]
             if (email.isBlank() || email.lowercase() == "null") continue
             val canvasCourseId = record[CsvColumns.CANVAS_COURSE_ID].toInt()
-            val courseRole = record[CsvColumns.COURSE_ROLE]
 
-            val user = usersCache.getOrPut(email) { convertToUser(record) }
-            val course = courseCache.getOrPut(canvasCourseId) { convertToCourse(record) }
-
-            val link = UserInCourse.createAndLink(user, course, parseCourseRole(courseRole))
-            userInCourseList.add(link)
+            usersCache.getOrPut(email) { convertToUser(record) }
+            courseCache.getOrPut(canvasCourseId) { convertToCourse(record) }
         }
+    }
+
+    private fun linkUsersAndCourses(
+        records: List<List<String>>,
+        courseCache: Map<Int, Course>,
+        usersCache: Map<String, Users>,
+    ): List<UserInCourse> {
+        val userInCourseList = mutableListOf<UserInCourse>()
+
+        for (record in records) {
+            val email = record[CsvColumns.USER_EMAIL]
+            if (email.isBlank() || email.lowercase() == "null") continue
+
+            val canvasCourseId = record[CsvColumns.CANVAS_COURSE_ID].toInt()
+            val courseRole = record[CsvColumns.COURSE_ROLE]
+            val user = usersCache[email]!!
+            val course = courseCache[canvasCourseId]!!
+
+            userInCourseList.add(UserInCourse.createAndLink(user, course, parseCourseRole(courseRole)))
+        }
+
+        return userInCourseList
     }
 
     private fun parseCourseRole(role: String): CourseRole =
