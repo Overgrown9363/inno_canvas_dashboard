@@ -68,10 +68,8 @@ class DashboardServiceImpl(
 
     private fun findUserInDatabaseByEmail(email: String): Users {
         val lowercaseEmail = email.lowercase()
-        val user = usersDB.findByIdOrNull(lowercaseEmail)
-        if (user == null) {
-            throw UserNotFoundException("User with email $email not found")
-        }
+        val user =
+            usersDB.findByIdOrNull(lowercaseEmail) ?: throw UserNotFoundException("User with email $email not found")
         return user
     }
 
