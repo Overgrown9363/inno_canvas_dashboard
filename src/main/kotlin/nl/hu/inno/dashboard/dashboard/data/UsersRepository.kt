@@ -5,5 +5,5 @@ import nl.hu.inno.dashboard.dashboard.domain.Users
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface UsersRepository : JpaRepository<Users, String> {
-    fun deleteAllByPrivileges(privilege: Privilege)
+    fun deleteAllByPrivilege(privilege: Privilege)
 }

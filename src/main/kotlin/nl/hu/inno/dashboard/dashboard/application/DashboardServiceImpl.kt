@@ -58,7 +58,7 @@ class DashboardServiceImpl(
 
         userInCourseDB.deleteAll()
         courseDB.deleteAll()
-        usersDB.deleteAllByPrivileges(Privilege.USER)
+        usersDB.deleteAllByPrivilege(Privilege.USER)
 
         val managedCourses = courseDB.saveAll(courseCache.values).associateBy { it.canvasCourseId }
         val managedUsers = usersDB.saveAll(usersCache.values).associateBy { it.email }
