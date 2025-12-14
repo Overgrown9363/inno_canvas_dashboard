@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { updateAdminUsers } from "../api/updateAdminUsers.js";
 import { getAdminUsers } from "../api/getAdminUsers.js";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "../css/admin-management.css";
 
 const ROLE_OPTIONS = ["USER", "ADMIN", "SUPERADMIN"];
@@ -65,9 +67,9 @@ function AdminManagementTable() {
 
             // renew user list after updating roles
             await fetchUsers();
-            alert("Rollen succesvol bijgewerkt!");
+            toast.success("Wijzigingen succesvol opgeslagen!");
         } catch (err) {
-            alert("Fout bij opslaan: " + err.message);
+            toast.error("Fout bij opslaan: " + err.message);
         } finally {
             setSaving(false);
         }
@@ -140,6 +142,7 @@ function AdminManagementTable() {
                     </button>
                 </>
             )}
+            <ToastContainer position="top-right" autoClose={3000} />
         </div>
     );
 }
