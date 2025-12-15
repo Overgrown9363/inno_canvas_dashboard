@@ -1,5 +1,7 @@
 package nl.hu.inno.dashboard.dashboard.application
 
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
 import nl.hu.inno.dashboard.dashboard.application.dto.AdminDTO
 import nl.hu.inno.dashboard.dashboard.application.dto.UsersDTO
 import nl.hu.inno.dashboard.dashboard.data.CourseRepository
@@ -31,6 +33,7 @@ class DashboardServiceImpl(
     private val userInCourseDB: UserInCourseRepository,
     private val fileParserService: FileParserService,
     private val fileFetcherService: FileFetcherService,
+    @PersistenceContext private val entityManager: EntityManager,
 ) : DashboardService {
     override fun findUserByEmail(email: String): UsersDTO {
         val user = findUserInDatabaseByEmail(email)
@@ -89,19 +92,27 @@ class DashboardServiceImpl(
         val resource = fileFetcherService.fetchCsvFile()
         val records = fileParserService.parseFile(resource)
 
+        usersDB.findAll().forEach { it.userInCourse.clear() }
+        courseDB.findAll().forEach { it.userInCourse.clear() }
+
+        courseDB.deleteAll()
+//        when refreshing users in the database, we preserve existing ADMIN and SUPERADMIN users
+        usersDB.deleteAllByAppRole(AppRole.USER)
+        clearPersistenceContext()
+
         val usersCache = mutableMapOf<String, Users>()
         val courseCache = mutableMapOf<Int, Course>()
         val userInCourseList = mutableListOf<UserInCourse>()
         linkUsersAndCourses(records, usersCache, courseCache, userInCourseList)
 
-        userInCourseDB.deleteAll()
-        courseDB.deleteAll()
-//        when refreshing users in the database, we preserve existing ADMIN and SUPERADMIN users
-        usersDB.deleteAllByAppRole(AppRole.USER)
-
         courseDB.saveAll(courseCache.values)
         usersDB.saveAll(usersCache.values)
         userInCourseDB.saveAll(userInCourseList)
+    }
+
+    private fun clearPersistenceContext() {
+        entityManager.flush()
+        entityManager.clear()
     }
 
     private fun findUserInDatabaseByEmail(email: String): Users {
