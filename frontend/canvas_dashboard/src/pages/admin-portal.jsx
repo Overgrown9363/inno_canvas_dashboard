@@ -4,7 +4,10 @@ import { getUserData } from "../api/getUserData.js";
 import AdminActionButton from "../components/AdminActionButton";
 import UserInfo from "../components/UserInformation";
 import useAuthCheck from "../hooks/useAuthCheck";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "../css/admin-button.css";
+import AdminManagementTable from "../components/AdminManagementTable.jsx";
 
 const AdminDashboard = () => {
   useAuthCheck();
@@ -29,10 +32,8 @@ const AdminDashboard = () => {
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error loading user data.</div>;
-  
-  if (!userData || userData.role !== "ADMIN") {
-    return <Navigate to="/" replace />;
-  }
+  if (!userData) return <Navigate to="/" replace />;
+  if (userData.appRole !== "ADMIN" && userData.appRole !== "SUPERADMIN") return <Navigate to="/" replace />;
 
   function handleHealth() {
     fetch("/api/health", {
@@ -49,7 +50,7 @@ const AdminDashboard = () => {
         console.log("Health check successful:", data);
       })
       .catch((error) => {
-        alert(error.message);
+        toast.error(error.message);
       });
   }
   function handleGenerateResult() {
@@ -64,7 +65,7 @@ const AdminDashboard = () => {
         return response.json();
       })
       .catch((error) => {
-        alert(error.message);
+        toast.error(error.message);
       });
   }
   function handleGenerateCourse() {
@@ -79,14 +80,14 @@ const AdminDashboard = () => {
         return response.json();
       })
       .catch((error) => {
-        alert(error.message);
+        toast.error(error.message);
       });
   }
 
   return (
     <div>
       <UserInfo data={userData} />
-      <div class="admin-button-group">
+      <div className="admin-button-group">
         <AdminActionButton
           name="Genereer Resultaat"
           onClick={handleGenerateResult}
@@ -107,6 +108,10 @@ const AdminDashboard = () => {
           onClick={handleHealth}
         ></AdminActionButton>
       </div>
+      {userData.appRole === "SUPERADMIN" && (
+        <AdminManagementTable />
+      )}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

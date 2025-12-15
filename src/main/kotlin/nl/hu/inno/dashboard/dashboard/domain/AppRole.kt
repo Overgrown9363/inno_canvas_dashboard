@@ -1,6 +1,7 @@
 package nl.hu.inno.dashboard.dashboard.domain
 
-enum class Privileges {
+enum class AppRole {
     USER,
-    ADMIN
+    ADMIN,
+    SUPERADMIN
 }

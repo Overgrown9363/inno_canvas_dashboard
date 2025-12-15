@@ -1,0 +1,11 @@
+.row-changed {
+    background: #ffeeba;
+}
+
+.row-superadmin {
+    opacity: 0.6;
+}
+
+.save-button {
+    margin-top: 1em;
+}
