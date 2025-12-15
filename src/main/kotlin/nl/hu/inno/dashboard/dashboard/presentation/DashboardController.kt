@@ -31,6 +31,7 @@ class DashboardController(
 
     @GetMapping("/users/admin")
     fun getAllAdminUsers(@AuthenticationPrincipal user: OAuth2User): ResponseEntity<List<AdminDTO>> {
+//        SUPERADMIN only function
         val email = user.attributes["email"] as? String
         if (email.isNullOrBlank()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
@@ -42,6 +43,7 @@ class DashboardController(
 
     @PutMapping("/users/admin")
     fun updateAdminRoles(@AuthenticationPrincipal user: OAuth2User, @RequestBody updatedUsers: List<UserPutRequest>): ResponseEntity<List<AdminDTO>> {
+//        SUPERADMIN only function
         val email = user.attributes["email"] as? String
         if (email.isNullOrBlank()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()

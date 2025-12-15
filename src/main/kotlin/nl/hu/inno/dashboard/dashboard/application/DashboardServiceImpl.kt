@@ -38,8 +38,9 @@ class DashboardServiceImpl(
     }
 
     override fun findAllAdmins(email: String): List<AdminDTO> {
+//        SUPERADMIN only function
         val requestUser = findUserInDatabaseByEmail(email)
-        if (requestUser.appRole == AppRole.USER) {
+        if (requestUser.appRole != AppRole.SUPERADMIN) {
             throw UserNotAuthorizedException("User with $email does not have the authorization to make this request")
         }
 
@@ -50,8 +51,9 @@ class DashboardServiceImpl(
     }
 
     override fun updateAdminUsers(email: String, usersToUpdate: List<AdminDTO>): List<AdminDTO> {
+//        SUPERADMIN only function
         val requestUser = findUserInDatabaseByEmail(email)
-        if (requestUser.appRole == AppRole.USER) {
+        if (requestUser.appRole != AppRole.SUPERADMIN) {
             throw UserNotAuthorizedException("User with $email does not have the authorization to make this request")
         }
 
