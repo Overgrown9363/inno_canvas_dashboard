@@ -58,11 +58,7 @@ function AdminManagementTable() {
 
     const handleSave = async () => {
         const changed = localUsers.filter(
-            (user) => {
-                if (!editedUsers[user.email]) return false;
-                const originalUser = adminUsers.find(u => u.email === user.email);
-                return originalUser && user.appRole !== originalUser.appRole;
-            }
+            (user) => isUserChanged(user, adminUsers, editedUsers)
         );
         if (changed.length === 0) return;
         setSaving(true);
@@ -79,14 +75,21 @@ function AdminManagementTable() {
         }
     };
 
+    function isUserChanged(user, adminUsers, editedUsers) {
+        if (!editedUsers[user.email]) return false;
+        const originalUser = adminUsers.find(u => u.email === user.email);
+        return originalUser && user.appRole !== originalUser.appRole;
+    }
+
     return (
         <div className="admin-management-group">
-            <h2>Beheer Gebruikers</h2>
+            <h2>Beheer admins</h2>
             {adminLoading && <div>Loading admin users...</div>}
             {adminError && <div>Error: {adminError}</div>}
             {!adminLoading && !adminError && (
                 <>
-                    <table>
+                    <table 
+                    aria-label="Admin gebruikers tabel">
                         <thead>
                             <tr>
                                 <th>Naam</th>
@@ -97,9 +100,8 @@ function AdminManagementTable() {
                         <tbody>
                             {localUsers.map((user) => {
                                 const isSuperadmin = user.appRole === "SUPERADMIN";
-                                const isChanged =
-                                    editedUsers[user.email] &&
-                                    user.appRole !== adminUsers.find(u => u.email === user.email).appRole;
+                                const adminUser = adminUsers.find(u => u.email === user.email);
+                                const isChanged = isUserChanged(user, adminUsers, editedUsers)
                                 return (
                                     <tr
                                         key={user.email}
@@ -112,6 +114,7 @@ function AdminManagementTable() {
                                         <td>{user.email}</td>
                                         <td>
                                             <select
+                                                aria-label={`Rol voor ${user.name}`}
                                                 value={user.appRole}
                                                 disabled={isSuperadmin}
                                                 onChange={(e) =>
