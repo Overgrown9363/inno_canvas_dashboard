@@ -100,7 +100,6 @@ function AdminManagementTable() {
                         <tbody>
                             {localUsers.map((user) => {
                                 const isSuperadmin = user.appRole === "SUPERADMIN";
-                                const adminUser = adminUsers.find(u => u.email === user.email);
                                 const isChanged = isUserChanged(user, adminUsers, editedUsers)
                                 return (
                                     <tr
