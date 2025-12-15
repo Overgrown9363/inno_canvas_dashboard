@@ -4,6 +4,8 @@ import { getUserData } from "../api/getUserData.js";
 import AdminActionButton from "../components/AdminActionButton";
 import UserInfo from "../components/UserInformation";
 import useAuthCheck from "../hooks/useAuthCheck";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "../css/admin-button.css";
 import AdminManagementTable from "../components/AdminManagementTable.jsx";
 
@@ -48,7 +50,7 @@ const AdminDashboard = () => {
         console.log("Health check successful:", data);
       })
       .catch((error) => {
-        alert(error.message);
+        toast.error(error.message);
       });
   }
   function handleGenerateResult() {
@@ -63,7 +65,7 @@ const AdminDashboard = () => {
         return response.json();
       })
       .catch((error) => {
-        alert(error.message);
+        toast.error(error.message);
       });
   }
   function handleGenerateCourse() {
@@ -78,7 +80,7 @@ const AdminDashboard = () => {
         return response.json();
       })
       .catch((error) => {
-        alert(error.message);
+        toast.error(error.message);
       });
   }
 
@@ -109,6 +111,7 @@ const AdminDashboard = () => {
       {userData.appRole === "SUPERADMIN" && (
         <AdminManagementTable />
       )}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };
