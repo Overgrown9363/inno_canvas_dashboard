@@ -93,6 +93,7 @@ class DashboardServiceImpl(
         val resource = fileFetcherService.fetchCsvFile()
         val records = fileParserService.parseFile(resource)
 
+//        we ensure userInCourse records get removed from the DB through orphanRemoval = true
         usersDB.findAll().forEach { it.userInCourse.clear() }
         courseDB.findAll().forEach { it.userInCourse.clear() }
 
