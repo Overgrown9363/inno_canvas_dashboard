@@ -5,7 +5,7 @@ export async function getAdminUsers() {
   });
 
   if (!response.ok) {
-    throw new Error("Could not fetch staff users");
+    throw new Error("Could not fetch admin users");
   }
 
   return await response.json();
