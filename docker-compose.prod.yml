@@ -56,4 +56,4 @@ services:
         - GF_SERVER_ROOT_URL=https://inno-dashboard.duckdns.org/health/
         - GF_SERVER_SERVE_FROM_SUB_PATH=true
       volumes:
-        - grafana_data:/var/lib/grafana
+        - /etc/grafana_data:/var/lib/grafana
