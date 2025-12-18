@@ -23,6 +23,9 @@ services:
       AZURE_TENANT_ID: ${AZURE_TENANT_ID}
       AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
       AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
+    volumes:
+      - shared-data:/shared-data
+      - ./development/shared-data:/shared-data
     expose:
       - "8080"
 
@@ -44,11 +47,6 @@ services:
       - /etc/caddy/Caddyfile:/etc/caddy/Caddyfile
       - /etc/caddy/caddy_data:/data
 
-  static-service:
-    build: development/test-data/courses
-    ports:
-      - "5000:80"
-
   grafana:
       image: grafana/grafana-enterprise
       container_name: grafana
@@ -60,3 +58,6 @@ services:
         - GF_SERVER_SERVE_FROM_SUB_PATH=true
       volumes:
         - /etc/grafana_data:/var/lib/grafana
+
+volumes:
+  shared-data:
