@@ -12,17 +12,19 @@ import java.net.URI
 @Service
 @Profile("prod")
 class FileFetcherServiceImpl(
-    @Value("\${filefetcher.base-url}")
-    private val baseUrl: String
+    @Value("\${volumes.path.shared-data}")
+    private val pathToSharedDataVolume: String,
+    @Value("\${volumes.path.shared-data.courses}")
+    private val coursesDirectory: String
 ) : FileFetcherService {
 
     override fun fetchCsvFile(): Resource {
-        val path = "${baseUrl}/user_data.csv"
+        val path = "${pathToSharedDataVolume}$coursesDirectory/user_data.csv"
         return UrlResource(URI.create(path))
     }
 
     override fun fetchDashboardHtml(email: String, role: String, courseCode: String, instanceName: String, relativeRequestPath: String): Resource {
-        val baseUrlWithInstance = "$baseUrl/$courseCode/$instanceName/dashboard"
+        val baseUrlWithInstance = "$pathToSharedDataVolume$coursesDirectory/$courseCode/$instanceName/dashboard"
         val resolvedPath = HtmlPathResolver.resolvePath(email, role, instanceName, relativeRequestPath)
         val fullPath = "$baseUrlWithInstance/$resolvedPath"
 
