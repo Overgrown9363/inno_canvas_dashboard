@@ -24,7 +24,7 @@
     justify-content: center;
 }
 
-.card-content a {
+.card-button {
     background: var(--color-hu-blue, #00a1e1);
     color: var(--color-white, white);
     border-radius: 5px;
@@ -33,16 +33,18 @@
     padding: 10px;
 }
 
-.card-content a:hover {
+.card-button:hover {
     background: var(--color-hu-blue-hover, #0088c8);
     box-shadow: 0 2px 8px rgba(0, 161, 225, 0.12);
     transform: translateY(-2px) scale(1.03);
+    color: var(--color-white, white);
 }
 
-.card-content a:active {
+.card-button:active {
     background: var(--color-hu-blue-active, #0088c8);
     box-shadow: 0 1px 4px rgba(0, 161, 225, 0.10);
     transform: translateY(1px) scale(0.98);
+    color: var(--color-white, white);
 }
 
 .card-content h2 {
