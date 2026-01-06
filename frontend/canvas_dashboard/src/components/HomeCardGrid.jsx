@@ -8,7 +8,7 @@ const HomeCardGrid = ({ userRole }) => {
         <div className="card-content">
           <h2>Cursus Overzicht</h2>
           <p>Hier vind je een overzicht van je huidige en in het verleden gevolgde cursussen.</p>
-          <Link to="/course-overview" className="card-button">
+          <Link to="/course-overview" className="card-button" aria-label="Navigeer naar Cursus Overzicht pagina">
             Ga naar Cursus Overzicht
           </Link>
         </div>
@@ -18,7 +18,7 @@ const HomeCardGrid = ({ userRole }) => {
           <div className="card-content">
             <h2>Admin Portaal</h2>
             <p>Vernieuw gegevens van de applicatie en beheer gebruikers via het admin portaal.</p>
-            <Link to="/admin-portal" className="card-button">
+            <Link to="/admin-portal" className="card-button" aria-label="Navigeer naar Admin Portaal pagina">
               Ga naar Admin Portaal
             </Link>
           </div>
