@@ -20,10 +20,15 @@ function App() {
 
   useEffect(() => {
     async function loadUser() {
-      const data = await getUserData();
+    const data = await getUserData();
+    if (data) {
       setUserRole(data.appRole);
       setUserEmail(data.email);
+    } else {
+      setUserRole("");
+      setUserEmail("");
     }
+  }
     loadUser();
   }, []);
 
