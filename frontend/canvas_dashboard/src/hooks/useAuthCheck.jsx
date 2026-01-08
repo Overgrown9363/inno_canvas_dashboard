@@ -17,10 +17,12 @@ function redirectToLogin() {
 }
 
 function useAuthCheck() {
+    const unauthorized = 401;
+    const forbidden = 403;
     useEffect(() => {
         fetch('/api/v1/security/users/me', { credentials: 'include' })
             .then((response) => {
-                if (response.status === 401 || response.status === 403) {
+                if (response.status === unauthorized || response.status === forbidden) {
                     redirectToLogin();
                 }
             })
