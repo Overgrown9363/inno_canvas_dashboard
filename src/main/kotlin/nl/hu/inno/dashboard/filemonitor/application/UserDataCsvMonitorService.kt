@@ -69,6 +69,7 @@ class UserDataCsvMonitorService(
 
         observer.addListener(object : FileAlterationListenerAdaptor() {
             override fun onFileChange(file: File) = handleFileChange(file)
+            override fun onFileCreate(file: File) = handleFileChange(file)
         })
 
         println("_____ successfully created observer _____")
