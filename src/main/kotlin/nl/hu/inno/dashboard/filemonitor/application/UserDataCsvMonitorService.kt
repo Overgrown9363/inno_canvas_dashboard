@@ -58,6 +58,9 @@ class UserDataCsvMonitorService(
 
     private fun createObserver(): FileAlterationObserver {
         println("_____ creating observer _____")
+
+        verifyCsvDirectoryExists()
+
         val observer = FileAlterationObserver.builder()
             .setPath(csvDirectoryPath)
             .setFileFilter(NameFileFilter(csvFileName))
@@ -75,6 +78,13 @@ class UserDataCsvMonitorService(
     private fun handleFileChange(file: File) {
         if (hashChecker.isContentChanged(file)) {
             println("_____ running handleFileChange -> detected change and hash difference _____")
+        }
+    }
+
+    private fun verifyCsvDirectoryExists() {
+        val dir = File(csvDirectoryPath)
+        if (!dir.exists() || !dir.isDirectory || !dir.canRead()) {
+            throw IllegalStateException("Directory $csvDirectoryPath does not exist or is not readable.")
         }
     }
 }
