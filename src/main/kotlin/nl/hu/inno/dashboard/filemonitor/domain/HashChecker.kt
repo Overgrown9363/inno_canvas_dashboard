@@ -20,8 +20,13 @@ class HashChecker {
 
     private fun calculateFileHash(file: File): String? {
         if (!file.exists()) return null
-        val bytes = file.readBytes()
-        val digest = MessageDigest.getInstance("SHA-256").digest(bytes)
-        return digest.joinToString("") { "%02x".format(it) }
+        return try {
+            val bytes = file.readBytes()
+            val digest = MessageDigest.getInstance("SHA-256").digest(bytes)
+            digest.joinToString("") { "%02x".format(it) }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 }
