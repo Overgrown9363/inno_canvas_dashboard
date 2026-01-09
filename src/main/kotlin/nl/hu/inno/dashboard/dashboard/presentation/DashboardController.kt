@@ -67,9 +67,15 @@ class DashboardController(
         return ResponseEntity.ok(resource)
     }
 
-    @PostMapping("/internal/users/refresh")
-    fun refreshUsersAndCourses(): ResponseEntity<Void> {
-        service.refreshUsersAndCourses()
+    @PostMapping("/users/refresh")
+    fun refreshUsersAndCourses(@AuthenticationPrincipal user: OAuth2User): ResponseEntity<Void> {
+//        ADMIN and SUPERADMIN only function
+        val email = user.attributes["email"] as? String
+        if (email.isNullOrBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
+
+        service.refreshUsersAndCoursesWithRoleCheck(email)
         return ResponseEntity.ok().build()
     }
 }
