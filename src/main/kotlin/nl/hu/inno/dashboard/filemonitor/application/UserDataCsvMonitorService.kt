@@ -19,6 +19,8 @@ class UserDataCsvMonitorService(
     private val pathToSharedDataVolume: String,
     @Value("\${volumes.path.shared-data.courses}")
     private val coursesDirectory: String,
+    @Value("\${file.monitor.interval.ms}")
+    private val intervalInMillis: Long,
     private val dashboardService: DashboardService,
     private val hashChecker: HashChecker
 ) : FileMonitorService {
@@ -33,7 +35,6 @@ class UserDataCsvMonitorService(
     override fun startWatching() {
         println("_____ initializing monitor _____")
         val observer = createObserver()
-        val intervalInMillis: Long = 5000
         monitor = FileAlterationMonitor(intervalInMillis, observer)
 
         try {
