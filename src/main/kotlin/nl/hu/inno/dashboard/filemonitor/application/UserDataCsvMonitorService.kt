@@ -28,6 +28,7 @@ class UserDataCsvMonitorService(
     private var monitor: FileAlterationMonitor? = null
     private val csvFileName = "user_data.csv"
     private val csvDirectoryPath: String = Paths.get(pathToSharedDataVolume, coursesDirectory).toString()
+    private var lastHash: String? = null
 
 //    TODO: remove println's here and in HashChecker component
 
@@ -76,7 +77,9 @@ class UserDataCsvMonitorService(
     }
 
     private fun handleFileChange(file: File) {
-        if (hashChecker.isContentChanged(file)) {
+        val (changed, newHash) = hashChecker.isContentChanged(file, lastHash)
+        if (changed) {
+            lastHash = newHash
             println("_____ running handleFileChange -> detected change and hash difference _____")
         }
     }

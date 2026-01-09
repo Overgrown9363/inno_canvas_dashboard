@@ -6,16 +6,14 @@ import java.security.MessageDigest
 
 @Component
 class HashChecker {
-    private var lastHash: String? = null
-
-    fun isContentChanged(file: File): Boolean {
+    fun isContentChanged(file: File, lastHash: String?): Pair<Boolean, String?> {
         println("_____ comparing hash _____")
         val currentHash = calculateFileHash(file)
         val changed = currentHash != null && currentHash != lastHash
-        if (changed) lastHash = currentHash
+
         println("_____ hash changed is: $changed _____")
         println("_____ hash previous: $lastHash || hash new: $currentHash")
-        return changed
+        return Pair(changed, currentHash)
     }
 
     private fun calculateFileHash(file: File): String? {
