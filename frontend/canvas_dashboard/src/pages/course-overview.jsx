@@ -35,11 +35,10 @@ const CourseOverview = () => {
 
     return (
         <div className='overview-container'>
-            <div className='overview-background'>
-                <h1>Cursus Overzicht</h1>
-                <UserInfo data={userData} />
-                <CardsGrid courses={userData.courses} />
-            </div>
+            <div className='overview-background'></div>
+            <h1>Cursus Overzicht</h1>
+            <UserInfo data={userData} />
+            <CardsGrid courses={userData.courses} />
         </div>
     );
 };
