@@ -119,26 +119,26 @@ class DashboardControllerIntegrationTest {
     @Test
     fun refreshUsersAndCourses_returnsOk() {
         mockMvc.perform(
-            post("/api/v1/dashboard/internal/users/refresh")
+            post("/api/v1/dashboard/users/refresh")
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(csrf())
-                .with(user("testuser"))
+                .with(oauth2Login().attributes { it["email"] = "admin@hu.nl" })
         ).andExpect(status().isOk)
 
-        verify(service).refreshUsersAndCourses()
+        verify(service).refreshUsersAndCoursesWithRoleCheck("admin@hu.nl")
     }
 
     @Test
     fun refreshUsersAndCourses_handlesException() {
-        doThrow(RuntimeException("fail")).`when`(service).refreshUsersAndCourses()
+        doThrow(RuntimeException("fail")).`when`(service).refreshUsersAndCoursesWithRoleCheck("admin@hu.nl")
 
         mockMvc.perform(
-            post("/api/v1/dashboard/internal/users/refresh")
+            post("/api/v1/dashboard/users/refresh")
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(csrf())
-                .with(user("testuser"))
+                .with(oauth2Login().attributes { it["email"] = "admin@hu.nl" })
         ).andExpect(status().isInternalServerError)
 
-        verify(service).refreshUsersAndCourses()
+        verify(service).refreshUsersAndCoursesWithRoleCheck("admin@hu.nl")
     }
 }
