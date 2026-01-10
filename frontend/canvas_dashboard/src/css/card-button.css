@@ -1,11 +1,15 @@
 .card-content-wrapper {
     height: 300px;
     width: 600px;
-    padding: 0px 20px;
+    padding: 20px;
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(4px);
+    border-radius: var(--border-radius-xl, 12px);
 }
 
 .card-content {
-    background: var(--color-white, white);
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(4px);
     padding: 40px;
     box-sizing: border-box;
     width: 100%;
@@ -14,6 +18,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    border: 1px solid var(--color-border-gray, #e3e3e3)
 }
 
 .card-content h2 {

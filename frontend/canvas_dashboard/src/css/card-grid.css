@@ -19,11 +19,6 @@
   border-radius: var(--border-radius-lg, 8px);
   padding: 12px;
   transition: border 0.3s, box-shadow 0.3s;
-  background-color: var(--color-white, white);
-
-
-
-
   background: rgba(255,255,255,0.85);
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
   border-radius: 12px;

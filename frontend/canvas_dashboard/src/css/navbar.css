@@ -1,5 +1,6 @@
 #navbar {
     height: 80px;
+    background-color: var(--color-white, white);
 }
 
 #navbar ul {
