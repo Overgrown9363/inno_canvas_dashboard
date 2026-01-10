@@ -30,7 +30,7 @@ class UserDataCsvMonitorService(
     private val csvDirectoryPath: String = Paths.get(pathToSharedDataVolume, coursesDirectory).toString()
     private var lastHash: String? = null
 
-//    TODO: remove println's here and in HashChecker component
+//    TODO: replace println's and e.printStackTrace()'s here and in HashChecker with proper logging
 
     @PostConstruct
     override fun startWatching() {

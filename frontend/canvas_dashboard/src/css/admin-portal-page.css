@@ -4,10 +4,6 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    /* background-image: url('/gebouwen_heidelberglaan-15.jpg');
-    background-size: cover;
-    background-position: center 20%;
-    background-repeat: no-repeat; */
     background: #909090;
     pointer-events: none;
     z-index: -2;

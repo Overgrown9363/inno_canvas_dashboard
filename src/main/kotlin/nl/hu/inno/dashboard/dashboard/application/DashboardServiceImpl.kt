@@ -90,13 +90,13 @@ class DashboardServiceImpl(
     }
 
     override fun refreshUsersAndCoursesWithRoleCheck(email: String) {
-//        entry point to refreshUsersAndCoursesInternal from REST API (admin portal)
+//        entry point to refreshUsersAndCourses from REST API (admin portal)
         verifyUserIsAdminOrSuperAdmin(email)
         refreshUsersAndCourses()
     }
 
     override fun refreshUsersAndCoursesInternal() {
-//        entry point to refreshUsersAndCoursesInternal from FileMonitor component
+//        entry point to refreshUsersAndCourses from FileMonitor component
         refreshUsersAndCourses()
     }
 
