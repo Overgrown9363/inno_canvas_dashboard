@@ -9,7 +9,7 @@ const HomePage = ({ userRole }) => {
         <div className="home-container">
             <div className="home-background">
                 <h1>Home page</h1>
-                <div className="card-wrapper">
+                <div className="home-card-wrapper">
                     <CardButton
                         cardHeading="Cursus Overzicht"
                         cardText="Hier vind je een overzicht van je huidige en in het verleden gevolgde cursussen."

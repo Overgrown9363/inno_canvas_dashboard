@@ -4,15 +4,19 @@ const CardButton = ({ cardHeading, cardText, buttonText, buttonAriaLabel, button
     <div className="card-content-wrapper">
         <div className="card-content">
             <h2>{cardHeading}</h2>
-            <p>{cardText}</p>
-            <button
-                className="card-button"
-                aria-label={buttonAriaLabel || buttonText}
-                onClick={buttonOnClick}
-                type="button"
-            >
-                {buttonText}
-            </button>
+            <div className="card-body">
+                <p>{cardText}</p>
+                <div className="card-button-wrapper">
+                    <button
+                        className="card-button"
+                        aria-label={buttonAriaLabel || buttonText}
+                        onClick={buttonOnClick}
+                        type="button"
+                    >
+                        {buttonText}
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 );
