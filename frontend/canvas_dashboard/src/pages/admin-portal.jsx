@@ -7,7 +7,7 @@ import CardButton from '../components/CardButton';
 import UserInfo from '../components/UserInformation';
 import useAuthCheck from '../hooks/useAuthCheck';
 import '../css/admin-button.css';
-import '../css/admin-portal.css';
+import '../css/admin-portal-page.css';
 import AdminManagementTable from '../components/AdminManagementTable.jsx';
 
 const AdminDashboard = () => {

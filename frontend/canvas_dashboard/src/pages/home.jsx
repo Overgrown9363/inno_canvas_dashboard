@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import CardButton from '../components/CardButton';
-import '../css/home.css';
+import '../css/home-page.css';
 
 const HomePage = ({ userRole }) => {
     const navigate = useNavigate();
