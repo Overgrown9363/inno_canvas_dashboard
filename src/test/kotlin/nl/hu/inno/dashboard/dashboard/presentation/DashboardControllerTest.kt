@@ -202,18 +202,46 @@ class DashboardControllerTest {
     }
 
     @Test
-    fun refreshUsersAndCourses_callsServiceAndReturnsOk() {
-        val actualResponse = controller.refreshUsersAndCourses()
+    fun refreshUsersAndCourses_returnsOk_whenEmailPresent() {
+        val mockUser = mock(OAuth2User::class.java)
+        val email = "admin@hu.nl"
+        `when`(mockUser.attributes).thenReturn(mapOf("email" to email))
 
-        verify(service).refreshUsersAndCourses()
+        val actualResponse = controller.refreshUsersAndCourses(mockUser)
+
+        verify(service).refreshUsersAndCoursesWithRoleCheck(email)
         assertEquals(ResponseEntity.ok().build<Void>(), actualResponse)
     }
 
     @Test
-    fun refreshUsersAndCourses_handlesException() {
-        doThrow(RuntimeException("fail")).`when`(service).refreshUsersAndCourses()
+    fun refreshUsersAndCourses_returnsUnauthorized_whenEmailMissing() {
+        val mockUser = mock(OAuth2User::class.java)
+        `when`(mockUser.attributes).thenReturn(emptyMap<String, Any>())
+
+        val actualResponse = controller.refreshUsersAndCourses(mockUser)
+
+        assertEquals(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build<Void>(), actualResponse)
+    }
+
+    @Test
+    fun refreshUsersAndCourses_returnsUnauthorized_whenEmailIsBlank() {
+        val mockUser = mock(OAuth2User::class.java)
+        `when`(mockUser.attributes).thenReturn(mapOf("email" to ""))
+
+        val actualResponse = controller.refreshUsersAndCourses(mockUser)
+
+        assertEquals(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build<Void>(), actualResponse)
+    }
+
+    @Test
+    fun refreshUsersAndCourses_throwsException_whenServiceThrows() {
+        val mockUser = mock(OAuth2User::class.java)
+        val email = "admin@hu.nl"
+        `when`(mockUser.attributes).thenReturn(mapOf("email" to email))
+        doThrow(RuntimeException("fail")).`when`(service).refreshUsersAndCoursesWithRoleCheck(email)
+
         assertThrows<RuntimeException> {
-            controller.refreshUsersAndCourses()
+            controller.refreshUsersAndCourses(mockUser)
         }
     }
 }
