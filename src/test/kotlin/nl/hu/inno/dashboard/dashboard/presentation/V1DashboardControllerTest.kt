@@ -122,7 +122,7 @@ class V1DashboardControllerTest {
             AdminDTO("other@hu.nl", "Other", "SUPERADMIN")
         )
         `when`(mockUser.attributes).thenReturn(mapOf("email" to email))
-        `when`(service.updateAdminUsers(anyString(), anyList())).thenReturn(expectedAdmins)
+        `when`(service.updateAdminUserRoles(anyString(), anyList())).thenReturn(expectedAdmins)
 
         val actualResponse = controller.updateAdminRoles(mockUser, userPutRequests)
 

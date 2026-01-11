@@ -50,7 +50,7 @@ class V1DashboardController(
         }
 
         val usersToUpdate = updatedUsers.map { AdminDTO(it.email, it.name, it.appRole) }
-        val userDTO = service.updateAdminUsers(email, usersToUpdate)
+        val userDTO = service.updateAdminUserRoles(email, usersToUpdate)
         return ResponseEntity.ok(userDTO)
     }
 

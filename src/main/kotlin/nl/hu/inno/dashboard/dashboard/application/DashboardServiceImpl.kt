@@ -7,16 +7,8 @@ import nl.hu.inno.dashboard.dashboard.application.dto.UsersDTO
 import nl.hu.inno.dashboard.dashboard.data.CourseRepository
 import nl.hu.inno.dashboard.dashboard.data.UserInCourseRepository
 import nl.hu.inno.dashboard.dashboard.data.UsersRepository
-import nl.hu.inno.dashboard.dashboard.domain.Course
-import nl.hu.inno.dashboard.dashboard.domain.CourseRole
-import nl.hu.inno.dashboard.dashboard.domain.AppRole
-import nl.hu.inno.dashboard.dashboard.domain.UserInCourse
-import nl.hu.inno.dashboard.dashboard.domain.Users
-import nl.hu.inno.dashboard.exception.exceptions.CourseNotFoundException
-import nl.hu.inno.dashboard.exception.exceptions.InvalidRoleException
-import nl.hu.inno.dashboard.exception.exceptions.UserNotAuthorizedException
-import nl.hu.inno.dashboard.exception.exceptions.UserNotFoundException
-import nl.hu.inno.dashboard.exception.exceptions.UserNotInCourseException
+import nl.hu.inno.dashboard.dashboard.domain.*
+import nl.hu.inno.dashboard.exception.exceptions.*
 import nl.hu.inno.dashboard.filefetcher.application.FileFetcherService
 import nl.hu.inno.dashboard.fileparser.application.FileParserService
 import org.springframework.core.io.Resource
@@ -28,9 +20,9 @@ import java.time.LocalDate
 @Service
 @Transactional
 class DashboardServiceImpl(
-    private val courseDB: CourseRepository,
-    private val usersDB: UsersRepository,
-    private val userInCourseDB: UserInCourseRepository,
+    private val courseDb: CourseRepository,
+    private val usersDb: UsersRepository,
+    private val userInCourseDb: UserInCourseRepository,
     private val fileParserService: FileParserService,
     private val fileFetcherService: FileFetcherService,
     @PersistenceContext private val entityManager: EntityManager,
@@ -45,33 +37,17 @@ class DashboardServiceImpl(
 
         val adminEmailSuffix = "@hu.nl"
         val adminRoles = listOf(AppRole.ADMIN, AppRole.SUPERADMIN)
-        val adminList = usersDB.findAllAdminCandidates(adminRoles, adminEmailSuffix)
+        val adminList = usersDb.findAllAdminCandidates(adminRoles, adminEmailSuffix)
 
         return adminList.map { AdminDTO.of(it) }
     }
 
-    override fun updateAdminUsers(email: String, usersToUpdate: List<AdminDTO>): List<AdminDTO> {
+    override fun updateAdminUserRoles(email: String, usersToUpdate: List<AdminDTO>): List<AdminDTO> {
         verifyUserIsSuperAdmin(email)
 
         val updatedUserList = mutableListOf<Users>()
-
-        for (changedUser in usersToUpdate) {
-            val user = findUserInDatabaseByEmail(changedUser.email)
-
-            if (user.appRole == AppRole.SUPERADMIN) continue
-
-            val newAppRole = when (changedUser.appRole) {
-                "USER" -> AppRole.USER
-                "ADMIN" -> AppRole.ADMIN
-                else -> throw InvalidRoleException("AppRole ${changedUser.appRole} is not a valid role")
-            }
-
-            if (user.appRole != newAppRole) {
-                user.appRole = newAppRole
-                usersDB.save(user)
-                updatedUserList.add(user)
-            }
-        }
+        updateUserRoles(usersToUpdate, updatedUserList)
+        usersDb.saveAll(updatedUserList)
 
         return updatedUserList.map { AdminDTO.of(it) }
     }
@@ -101,26 +77,64 @@ class DashboardServiceImpl(
     }
 
     private fun refreshUsersAndCourses() {
-        val resource = fileFetcherService.fetchCsvFile()
-        val records = fileParserService.parseFile(resource)
+        val userDataCsvFile = fileFetcherService.fetchCsvFile()
+        val parsedRecords = fileParserService.parseFile(userDataCsvFile)
 
-//        we ensure userInCourse records get removed from the DB through orphanRemoval = true
-        usersDB.findAll().forEach { it.userInCourse.clear() }
-        courseDB.findAll().forEach { it.userInCourse.clear() }
-
-        courseDB.deleteAll()
+//        ensure UserInCourse associations are deleted first
+        userInCourseDb.deleteAllUserInCourseRecords()
+        courseDb.deleteAll()
 //        when refreshing users in the database, we preserve existing ADMIN and SUPERADMIN users
-        usersDB.deleteAllByAppRole(AppRole.USER)
+        usersDb.deleteAllByAppRole(AppRole.USER)
         clearPersistenceContext()
 
+//        create Users and Course objects and persist them
         val usersCache = mutableMapOf<String, Users>()
         val courseCache = mutableMapOf<Int, Course>()
-        val userInCourseList = mutableListOf<UserInCourse>()
-        linkUsersAndCourses(records, usersCache, courseCache, userInCourseList)
+        createUsersAndCoursesFromCsvRecords(parsedRecords, usersCache, courseCache)
+        courseDb.saveAll(courseCache.values)
+        usersDb.saveAll(usersCache.values)
 
-        courseDB.saveAll(courseCache.values)
-        usersDB.saveAll(usersCache.values)
-        userInCourseDB.saveAll(userInCourseList)
+//        add the UserInCourse associations and persist them
+        val userInCourseList = createUserInCourseAssociations(parsedRecords, usersCache, courseCache)
+        userInCourseDb.saveAll(userInCourseList)
+    }
+
+    private fun createUsersAndCoursesFromCsvRecords(
+        parsedRecords: List<List<String>>,
+        usersCache: MutableMap<String, Users>,
+        courseCache: MutableMap<Int, Course>
+    ) {
+        for (record in parsedRecords) {
+            val email = record[CsvColumns.USER_EMAIL]
+            if (email.isBlank() || email.lowercase() == "null") continue
+            val canvasCourseId = record[CsvColumns.CANVAS_COURSE_ID].toInt()
+
+//            when refreshing users in the database, we preserve existing ADMIN and SUPERADMIN users
+            usersCache.getOrPut(email) {
+                usersDb.findByIdOrNull(email.lowercase()) ?: convertToUser(record)
+            }
+            courseCache.getOrPut(canvasCourseId) { convertToCourse(record) }
+        }
+    }
+
+    private fun createUserInCourseAssociations(
+        parsedRecords: List<List<String>>,
+        usersCache: MutableMap<String, Users>,
+        courseCache: MutableMap<Int, Course>
+    ): MutableList<UserInCourse> {
+        val userInCourseList = mutableListOf<UserInCourse>()
+        for (record in parsedRecords) {
+            val email = record[CsvColumns.USER_EMAIL]
+            if (email.isBlank() || email.lowercase() == "null") continue
+            val canvasCourseId = record[CsvColumns.CANVAS_COURSE_ID].toInt()
+            val courseRole = record[CsvColumns.COURSE_ROLE]
+
+            val user = usersCache[email]!!
+            val course = courseCache[canvasCourseId]!!
+            val link = UserInCourse.createAndLink(user, course, parseCourseRole(courseRole))
+            userInCourseList.add(link)
+        }
+        return userInCourseList
     }
 
     private fun clearPersistenceContext() {
@@ -131,8 +145,32 @@ class DashboardServiceImpl(
     private fun findUserInDatabaseByEmail(email: String): Users {
         val lowercaseEmail = email.lowercase()
         val user =
-            usersDB.findByIdOrNull(lowercaseEmail) ?: throw UserNotFoundException("User with email $email not found")
+            usersDb.findByIdOrNull(lowercaseEmail) ?: throw UserNotFoundException("User with email $email not found")
         return user
+    }
+
+    private fun updateUserRoles(
+        usersToUpdate: List<AdminDTO>,
+        updatedUserList: MutableList<Users>
+    ) {
+        for (changedUser in usersToUpdate) {
+            val user = findUserInDatabaseByEmail(changedUser.email)
+
+//            ensure SUPERADMIN's cannot lose their role
+            if (user.appRole == AppRole.SUPERADMIN) continue
+
+            val newAppRole = when (changedUser.appRole) {
+                "USER" -> AppRole.USER
+                "ADMIN" -> AppRole.ADMIN
+                else -> throw InvalidRoleException("AppRole ${changedUser.appRole} is not a valid role")
+            }
+
+//            only update user if their role changed
+            if (user.appRole != newAppRole) {
+                user.appRole = newAppRole
+                updatedUserList.add(user)
+            }
+        }
     }
 
     private fun verifyUserIsSuperAdmin(email: String) {
@@ -146,29 +184,6 @@ class DashboardServiceImpl(
         val requestUser = findUserInDatabaseByEmail(email)
         if (requestUser.appRole != AppRole.SUPERADMIN && requestUser.appRole != AppRole.ADMIN) {
             throw UserNotAuthorizedException("User with $email does not have the authorization to make this request")
-        }
-    }
-
-    private fun linkUsersAndCourses(
-        records: List<List<String>>,
-        usersCache: MutableMap<String, Users>,
-        courseCache: MutableMap<Int, Course>,
-        userInCourseList: MutableList<UserInCourse>
-    ) {
-        for (record in records) {
-            val email = record[CsvColumns.USER_EMAIL]
-            if (email.isBlank() || email.lowercase() == "null") continue
-            val canvasCourseId = record[CsvColumns.CANVAS_COURSE_ID].toInt()
-            val courseRole = record[CsvColumns.COURSE_ROLE]
-
-//            when refreshing users in the database, we preserve existing ADMIN and SUPERADMIN users
-            val user = usersCache.getOrPut(email) {
-                usersDB.findByIdOrNull(email.lowercase()) ?: convertToUser(record)
-            }
-            val course = courseCache.getOrPut(canvasCourseId) { convertToCourse(record) }
-
-            val link = UserInCourse.createAndLink(user, course, parseCourseRole(courseRole))
-            userInCourseList.add(link)
         }
     }
 
