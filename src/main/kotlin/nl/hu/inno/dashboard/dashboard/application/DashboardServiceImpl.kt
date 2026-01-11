@@ -101,25 +101,22 @@ class DashboardServiceImpl(
     }
 
     private fun refreshUsersAndCourses() {
-        val resource = fileFetcherService.fetchCsvFile()
-        val records = fileParserService.parseFile(resource)
-        println("parsed records")
+        val userDataCsvFile = fileFetcherService.fetchCsvFile()
+        val parsedRecords = fileParserService.parseFile(userDataCsvFile)
+
         val start = System.currentTimeMillis()
 
         userInCourseDB.deleteAllUserInCourseRecords()
-        println("cleared UserInCourse records")
-
         courseDB.deleteAll()
 //        when refreshing users in the database, we preserve existing ADMIN and SUPERADMIN users
         usersDB.deleteAllByAppRole(AppRole.USER)
         clearPersistenceContext()
-        println("cleared persistence context")
 
-         val usersCache = mutableMapOf<String, Users>()
-         val courseCache = mutableMapOf<Int, Course>()
+        val usersCache = mutableMapOf<String, Users>()
+        val courseCache = mutableMapOf<Int, Course>()
 
         // 1. Maak users en courses aan, voeg GEEN UserInCourse toe
-        for (record in records) {
+        for (record in parsedRecords) {
             val email = record[CsvColumns.USER_EMAIL]
             if (email.isBlank() || email.lowercase() == "null") continue
             val canvasCourseId = record[CsvColumns.CANVAS_COURSE_ID].toInt()
@@ -136,7 +133,7 @@ class DashboardServiceImpl(
 
         // 3. Maak nu pas UserInCourse-objecten aan en koppel ze
         val userInCourseList = mutableListOf<UserInCourse>()
-        for (record in records) {
+        for (record in parsedRecords) {
             val email = record[CsvColumns.USER_EMAIL]
             if (email.isBlank() || email.lowercase() == "null") continue
             val canvasCourseId = record[CsvColumns.CANVAS_COURSE_ID].toInt()
