@@ -28,9 +28,9 @@ import java.time.LocalDate
 @Service
 @Transactional
 class DashboardServiceImpl(
-    private val courseDB: CourseRepository,
-    private val usersDB: UsersRepository,
-    private val userInCourseDB: UserInCourseRepository,
+    private val courseDb: CourseRepository,
+    private val usersDb: UsersRepository,
+    private val userInCourseDb: UserInCourseRepository,
     private val fileParserService: FileParserService,
     private val fileFetcherService: FileFetcherService,
     @PersistenceContext private val entityManager: EntityManager,
@@ -45,7 +45,7 @@ class DashboardServiceImpl(
 
         val adminEmailSuffix = "@hu.nl"
         val adminRoles = listOf(AppRole.ADMIN, AppRole.SUPERADMIN)
-        val adminList = usersDB.findAllAdminCandidates(adminRoles, adminEmailSuffix)
+        val adminList = usersDb.findAllAdminCandidates(adminRoles, adminEmailSuffix)
 
         return adminList.map { AdminDTO.of(it) }
     }
@@ -68,7 +68,7 @@ class DashboardServiceImpl(
 
             if (user.appRole != newAppRole) {
                 user.appRole = newAppRole
-                usersDB.save(user)
+                usersDb.save(user)
                 updatedUserList.add(user)
             }
         }
@@ -106,10 +106,10 @@ class DashboardServiceImpl(
 
         val start = System.currentTimeMillis()
 
-        userInCourseDB.deleteAllUserInCourseRecords()
-        courseDB.deleteAll()
+        userInCourseDb.deleteAllUserInCourseRecords()
+        courseDb.deleteAll()
 //        when refreshing users in the database, we preserve existing ADMIN and SUPERADMIN users
-        usersDB.deleteAllByAppRole(AppRole.USER)
+        usersDb.deleteAllByAppRole(AppRole.USER)
         clearPersistenceContext()
 
         val usersCache = mutableMapOf<String, Users>()
@@ -122,14 +122,14 @@ class DashboardServiceImpl(
             val canvasCourseId = record[CsvColumns.CANVAS_COURSE_ID].toInt()
 
             usersCache.getOrPut(email) {
-                usersDB.findByIdOrNull(email.lowercase()) ?: convertToUser(record)
+                usersDb.findByIdOrNull(email.lowercase()) ?: convertToUser(record)
             }
             courseCache.getOrPut(canvasCourseId) { convertToCourse(record) }
         }
 
         // 2. Sla eerst users en courses op
-        courseDB.saveAll(courseCache.values)
-        usersDB.saveAll(usersCache.values)
+        courseDb.saveAll(courseCache.values)
+        usersDb.saveAll(usersCache.values)
 
         // 3. Maak nu pas UserInCourse-objecten aan en koppel ze
         val userInCourseList = mutableListOf<UserInCourse>()
@@ -146,7 +146,7 @@ class DashboardServiceImpl(
         }
 
         // 4. Sla nu de UserInCourse-objecten op
-        userInCourseDB.saveAll(userInCourseList)
+        userInCourseDb.saveAll(userInCourseList)
 
         val end = System.currentTimeMillis()
         println("function took: ${end - start}ms to complete")
@@ -160,7 +160,7 @@ class DashboardServiceImpl(
     private fun findUserInDatabaseByEmail(email: String): Users {
         val lowercaseEmail = email.lowercase()
         val user =
-            usersDB.findByIdOrNull(lowercaseEmail) ?: throw UserNotFoundException("User with email $email not found")
+            usersDb.findByIdOrNull(lowercaseEmail) ?: throw UserNotFoundException("User with email $email not found")
         return user
     }
 
@@ -192,7 +192,7 @@ class DashboardServiceImpl(
 
 //            when refreshing users in the database, we preserve existing ADMIN and SUPERADMIN users
             val user = usersCache.getOrPut(email) {
-                usersDB.findByIdOrNull(email.lowercase()) ?: convertToUser(record)
+                usersDb.findByIdOrNull(email.lowercase()) ?: convertToUser(record)
             }
             val course = courseCache.getOrPut(canvasCourseId) { convertToCourse(record) }
 
