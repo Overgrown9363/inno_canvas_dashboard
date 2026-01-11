@@ -19,8 +19,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 
-@WebMvcTest(V1DashboardController::class)
-class V1DashboardControllerIntegrationTest {
+@WebMvcTest(DashboardController::class)
+class DashboardControllerIntegrationTest {
 
     @Autowired
     lateinit var mockMvc: MockMvc
@@ -119,26 +119,26 @@ class V1DashboardControllerIntegrationTest {
     @Test
     fun refreshUsersAndCourses_returnsOk() {
         mockMvc.perform(
-            post("/api/v1/dashboard/users/refresh")
+            post("/api/v1/dashboard/internal/users/refresh")
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(csrf())
-                .with(oauth2Login().attributes { it["email"] = "admin@hu.nl" })
+                .with(user("testuser"))
         ).andExpect(status().isOk)
 
-        verify(service).refreshUsersAndCoursesWithRoleCheck("admin@hu.nl")
+        verify(service).refreshUsersAndCourses()
     }
 
     @Test
     fun refreshUsersAndCourses_handlesException() {
-        doThrow(RuntimeException("fail")).`when`(service).refreshUsersAndCoursesWithRoleCheck("admin@hu.nl")
+        doThrow(RuntimeException("fail")).`when`(service).refreshUsersAndCourses()
 
         mockMvc.perform(
-            post("/api/v1/dashboard/users/refresh")
+            post("/api/v1/dashboard/internal/users/refresh")
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(csrf())
-                .with(oauth2Login().attributes { it["email"] = "admin@hu.nl" })
+                .with(user("testuser"))
         ).andExpect(status().isInternalServerError)
 
-        verify(service).refreshUsersAndCoursesWithRoleCheck("admin@hu.nl")
+        verify(service).refreshUsersAndCourses()
     }
 }

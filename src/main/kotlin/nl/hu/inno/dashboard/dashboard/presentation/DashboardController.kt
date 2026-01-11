@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/dashboard/")
-class V1DashboardController(
+class DashboardController(
     private val service: DashboardServiceImpl
     ) {
 
@@ -50,7 +50,7 @@ class V1DashboardController(
         }
 
         val usersToUpdate = updatedUsers.map { AdminDTO(it.email, it.name, it.appRole) }
-        val userDTO = service.updateAdminUserRoles(email, usersToUpdate)
+        val userDTO = service.updateAdminUsers(email, usersToUpdate)
         return ResponseEntity.ok(userDTO)
     }
 
@@ -67,15 +67,9 @@ class V1DashboardController(
         return ResponseEntity.ok(resource)
     }
 
-    @PostMapping("/users/refresh")
-    fun refreshUsersAndCourses(@AuthenticationPrincipal user: OAuth2User): ResponseEntity<Void> {
-//        ADMIN and SUPERADMIN only function
-        val email = user.attributes["email"] as? String
-        if (email.isNullOrBlank()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
-
-        service.refreshUsersAndCoursesWithRoleCheck(email)
+    @PostMapping("/internal/users/refresh")
+    fun refreshUsersAndCourses(): ResponseEntity<Void> {
+        service.refreshUsersAndCourses()
         return ResponseEntity.ok().build()
     }
 }

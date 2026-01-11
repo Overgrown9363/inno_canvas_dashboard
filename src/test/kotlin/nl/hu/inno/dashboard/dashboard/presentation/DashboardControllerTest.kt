@@ -17,14 +17,14 @@ import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.Resource
 
-class V1DashboardControllerTest {
+class DashboardControllerTest {
     private lateinit var service: DashboardServiceImpl
-    private lateinit var controller: V1DashboardController
+    private lateinit var controller: DashboardController
 
     @BeforeEach
     fun setUp() {
         service = mock(DashboardServiceImpl::class.java)
-        controller = V1DashboardController(service)
+        controller = DashboardController(service)
     }
 
     @Test
@@ -122,7 +122,7 @@ class V1DashboardControllerTest {
             AdminDTO("other@hu.nl", "Other", "SUPERADMIN")
         )
         `when`(mockUser.attributes).thenReturn(mapOf("email" to email))
-        `when`(service.updateAdminUserRoles(anyString(), anyList())).thenReturn(expectedAdmins)
+        `when`(service.updateAdminUsers(anyString(), anyList())).thenReturn(expectedAdmins)
 
         val actualResponse = controller.updateAdminRoles(mockUser, userPutRequests)
 
@@ -202,46 +202,18 @@ class V1DashboardControllerTest {
     }
 
     @Test
-    fun refreshUsersAndCourses_returnsOk_whenEmailPresent() {
-        val mockUser = mock(OAuth2User::class.java)
-        val email = "admin@hu.nl"
-        `when`(mockUser.attributes).thenReturn(mapOf("email" to email))
+    fun refreshUsersAndCourses_callsServiceAndReturnsOk() {
+        val actualResponse = controller.refreshUsersAndCourses()
 
-        val actualResponse = controller.refreshUsersAndCourses(mockUser)
-
-        verify(service).refreshUsersAndCoursesWithRoleCheck(email)
+        verify(service).refreshUsersAndCourses()
         assertEquals(ResponseEntity.ok().build<Void>(), actualResponse)
     }
 
     @Test
-    fun refreshUsersAndCourses_returnsUnauthorized_whenEmailMissing() {
-        val mockUser = mock(OAuth2User::class.java)
-        `when`(mockUser.attributes).thenReturn(emptyMap<String, Any>())
-
-        val actualResponse = controller.refreshUsersAndCourses(mockUser)
-
-        assertEquals(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build<Void>(), actualResponse)
-    }
-
-    @Test
-    fun refreshUsersAndCourses_returnsUnauthorized_whenEmailIsBlank() {
-        val mockUser = mock(OAuth2User::class.java)
-        `when`(mockUser.attributes).thenReturn(mapOf("email" to ""))
-
-        val actualResponse = controller.refreshUsersAndCourses(mockUser)
-
-        assertEquals(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build<Void>(), actualResponse)
-    }
-
-    @Test
-    fun refreshUsersAndCourses_throwsException_whenServiceThrows() {
-        val mockUser = mock(OAuth2User::class.java)
-        val email = "admin@hu.nl"
-        `when`(mockUser.attributes).thenReturn(mapOf("email" to email))
-        doThrow(RuntimeException("fail")).`when`(service).refreshUsersAndCoursesWithRoleCheck(email)
-
+    fun refreshUsersAndCourses_handlesException() {
+        doThrow(RuntimeException("fail")).`when`(service).refreshUsersAndCourses()
         assertThrows<RuntimeException> {
-            controller.refreshUsersAndCourses(mockUser)
+            controller.refreshUsersAndCourses()
         }
     }
 }
