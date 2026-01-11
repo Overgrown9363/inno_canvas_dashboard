@@ -9,8 +9,26 @@ services:
       - "15432:5432"
     volumes:
       - ./development/db:/docker-entrypoint-initdb.d
-
-  static-service:
-      build: development/test-data/courses
-      ports:
-        - "5000:80"
+  
+#   backend:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     depends_on:
+#       - db
+#     environment:
+#       SPRING_PROFILES_ACTIVE: prod
+#       DB_NAME: ${DB_NAME}
+#       DB_USERNAME: ${DB_USERNAME}
+#       DB_PASSWORD: ${DB_PASSWORD}
+#       AZURE_TENANT_ID: ${AZURE_TENANT_ID}
+#       AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
+#       AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
+#     volumes:
+#       - shared-data:/shared-data
+#       - ./development/shared-data:/shared-data
+#     expose:
+#       - "8080"
+  
+# volumes:
+#   shared-data:

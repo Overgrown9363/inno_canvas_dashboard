@@ -1,11 +1,14 @@
-import "../css/home.css";
+import '../css/home.css';
+import HomeCardGrid from '../components/HomeCardGrid';
 
-const HomePage = () => {
-
+const HomePage = ({ userRole }) => {
 
     return (
-        <div className="home-background">
-            <h1>Home page</h1>
+        <div className="home-container">
+            <div className="home-background">
+                <h1>Home page</h1>
+                <HomeCardGrid userRole={userRole} />
+            </div>
         </div>
     );
 };
