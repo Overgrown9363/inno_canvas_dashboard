@@ -104,11 +104,10 @@ class DashboardServiceImpl(
         val resource = fileFetcherService.fetchCsvFile()
         val records = fileParserService.parseFile(resource)
         println("parsed records")
+        val start = System.currentTimeMillis()
 
-//        we ensure userInCourse records get removed from the DB through orphanRemoval = true
-        usersDB.findAll().forEach { it.userInCourse.clear() }
-        courseDB.findAll().forEach { it.userInCourse.clear() }
-        println("cleared users and course-dbs")
+        userInCourseDB.deleteAllUserInCourseRecords()
+        println("cleared UserInCourse records")
 
         courseDB.deleteAll()
 //        when refreshing users in the database, we preserve existing ADMIN and SUPERADMIN users
@@ -118,16 +117,6 @@ class DashboardServiceImpl(
 
          val usersCache = mutableMapOf<String, Users>()
          val courseCache = mutableMapOf<Int, Course>()
-//         val userInCourseList = mutableListOf<UserInCourse>()
-        // linkUsersAndCourses(records, usersCache, courseCache, userInCourseList)
-        // println("linked all users, courses and userInCourses")
-
-        // courseDB.saveAll(courseCache.values)
-        // println("saved courses")
-        // usersDB.saveAll(usersCache.values)
-        // println("saved users")
-        // userInCourseDB.saveAll(userInCourseList)
-        // println("saved userInCourses")
 
         // 1. Maak users en courses aan, voeg GEEN UserInCourse toe
         for (record in records) {
@@ -144,7 +133,6 @@ class DashboardServiceImpl(
         // 2. Sla eerst users en courses op
         courseDB.saveAll(courseCache.values)
         usersDB.saveAll(usersCache.values)
-        // clearPersistenceContext()
 
         // 3. Maak nu pas UserInCourse-objecten aan en koppel ze
         val userInCourseList = mutableListOf<UserInCourse>()
@@ -162,6 +150,9 @@ class DashboardServiceImpl(
 
         // 4. Sla nu de UserInCourse-objecten op
         userInCourseDB.saveAll(userInCourseList)
+
+        val end = System.currentTimeMillis()
+        println("function took: ${end - start}ms to complete")
     }
 
     private fun clearPersistenceContext() {
