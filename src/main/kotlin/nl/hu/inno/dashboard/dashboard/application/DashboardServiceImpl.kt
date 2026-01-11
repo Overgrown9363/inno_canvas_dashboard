@@ -50,28 +50,12 @@ class DashboardServiceImpl(
         return adminList.map { AdminDTO.of(it) }
     }
 
-    override fun updateAdminUsers(email: String, usersToUpdate: List<AdminDTO>): List<AdminDTO> {
+    override fun updateAdminUserRoles(email: String, usersToUpdate: List<AdminDTO>): List<AdminDTO> {
         verifyUserIsSuperAdmin(email)
 
         val updatedUserList = mutableListOf<Users>()
-
-        for (changedUser in usersToUpdate) {
-            val user = findUserInDatabaseByEmail(changedUser.email)
-
-            if (user.appRole == AppRole.SUPERADMIN) continue
-
-            val newAppRole = when (changedUser.appRole) {
-                "USER" -> AppRole.USER
-                "ADMIN" -> AppRole.ADMIN
-                else -> throw InvalidRoleException("AppRole ${changedUser.appRole} is not a valid role")
-            }
-
-            if (user.appRole != newAppRole) {
-                user.appRole = newAppRole
-                usersDb.save(user)
-                updatedUserList.add(user)
-            }
-        }
+        updateUserRoles(usersToUpdate, updatedUserList)
+        usersDb.saveAll(updatedUserList)
 
         return updatedUserList.map { AdminDTO.of(it) }
     }
@@ -170,6 +154,30 @@ class DashboardServiceImpl(
         val user =
             usersDb.findByIdOrNull(lowercaseEmail) ?: throw UserNotFoundException("User with email $email not found")
         return user
+    }
+
+    private fun updateUserRoles(
+        usersToUpdate: List<AdminDTO>,
+        updatedUserList: MutableList<Users>
+    ) {
+        for (changedUser in usersToUpdate) {
+            val user = findUserInDatabaseByEmail(changedUser.email)
+
+//            ensure SUPERADMIN's cannot lose their role
+            if (user.appRole == AppRole.SUPERADMIN) continue
+
+            val newAppRole = when (changedUser.appRole) {
+                "USER" -> AppRole.USER
+                "ADMIN" -> AppRole.ADMIN
+                else -> throw InvalidRoleException("AppRole ${changedUser.appRole} is not a valid role")
+            }
+
+//            only update user if their role changed
+            if (user.appRole != newAppRole) {
+                user.appRole = newAppRole
+                updatedUserList.add(user)
+            }
+        }
     }
 
     private fun verifyUserIsSuperAdmin(email: String) {
