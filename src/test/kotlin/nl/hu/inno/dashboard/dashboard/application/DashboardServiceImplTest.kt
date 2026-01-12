@@ -11,6 +11,7 @@ import nl.hu.inno.dashboard.dashboard.domain.Course
 import nl.hu.inno.dashboard.dashboard.domain.CourseRole
 import nl.hu.inno.dashboard.dashboard.domain.UserInCourse
 import nl.hu.inno.dashboard.dashboard.domain.Users
+import nl.hu.inno.dashboard.exception.exceptions.InvalidRoleException
 import nl.hu.inno.dashboard.exception.exceptions.UserNotAuthorizedException
 import nl.hu.inno.dashboard.exception.exceptions.UserNotFoundException
 import nl.hu.inno.dashboard.exception.exceptions.UserNotInCourseException
@@ -18,12 +19,14 @@ import nl.hu.inno.dashboard.filefetcher.application.FileFetcherService
 import nl.hu.inno.dashboard.fileparser.application.FileParserService
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.mockito.ArgumentMatchers.anyList
 import org.mockito.ArgumentMatchers.argThat
 import org.mockito.Mockito.*
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.Resource
+import java.lang.reflect.InvocationTargetException
 import java.time.LocalDate
 import java.util.*
 import kotlin.test.assertEquals
@@ -300,5 +303,56 @@ class DashboardServiceImplTest {
         verify(usersDB).saveAll(argThat { users: Collection<Users> ->
             users.none { it.email == "null"}
         })
+    }
+
+    @Test
+    fun verifyUserIsAdminOrSuperAdmin_throws_whenUserIsNotAdminOrSuperAdmin() {
+        val user = Users.of("user@hu.nl", "User")
+        user.appRole = AppRole.USER
+        `when`(usersDB.findById("user@hu.nl")).thenReturn(Optional.of(user))
+
+        val exception = assertThrows(UserNotAuthorizedException::class.java) {
+            service.verifyUserIsAdminOrSuperAdmin("user@hu.nl")
+        }
+        assertEquals("User with user@hu.nl does not have the authorization to make this request", exception.message)
+    }
+
+    @Test
+    fun refreshUsersAndCoursesWithRoleCheck_callsVerifyAndRefresh_whenAdmin() {
+        val admin = Users.of("admin@hu.nl", "Admin").apply { appRole = AppRole.ADMIN }
+        `when`(usersDB.findById("admin@hu.nl")).thenReturn(Optional.of(admin))
+
+        assertDoesNotThrow {
+            service.refreshUsersAndCoursesWithRoleCheck("admin@hu.nl")
+        }
+        verify(courseDB, atLeastOnce()).saveAll(any<List<Course>>())
+        verify(usersDB, atLeastOnce()).saveAll(any<List<Users>>())
+    }
+
+    @Test
+    fun updateAdminUserRoles_throwsInvalidRoleException_whenInvalidRoleGiven() {
+        val superAdmin = Users.of("super.admin@hu.nl", "Super Admin").apply { appRole = AppRole.SUPERADMIN }
+        val user = Users.of("user@hu.nl", "User").apply { appRole = AppRole.USER }
+        val invalidDTO = AdminDTO(email = "user@hu.nl", name = "User", appRole = "NOT_A_ROLE")
+
+        `when`(usersDB.findById("super.admin@hu.nl")).thenReturn(Optional.of(superAdmin))
+        `when`(usersDB.findById("user@hu.nl")).thenReturn(Optional.of(user))
+
+        val exception = assertThrows(InvalidRoleException::class.java) {
+            service.updateAdminUserRoles("super.admin@hu.nl", listOf(invalidDTO))
+        }
+        assertEquals("AppRole NOT_A_ROLE is not a valid role", exception.message)
+    }
+
+    @Test
+    fun parseCourseRole_throwsInvalidRoleException_whenInvalidCourseRoleGiven() {
+        val method = DashboardServiceImpl::class.java.getDeclaredMethod("parseCourseRole", String::class.java)
+        method.isAccessible = true
+
+        val exception = assertThrows(InvocationTargetException::class.java) {
+            method.invoke(service, "NOT_A_ROLE")
+        }
+        assertTrue(exception.cause is InvalidRoleException)
+        assertEquals("Invalid course role: NOT_A_ROLE", exception.cause?.message)
     }
 }
