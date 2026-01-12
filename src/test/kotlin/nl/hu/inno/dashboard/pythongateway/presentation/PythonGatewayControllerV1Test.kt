@@ -24,36 +24,36 @@ class PythonGatewayControllerV1Test {
     }
 
     @Test
-    fun getDashboard_returnsOk_whenEmailPresent() {
+    fun startPythonScript_returnsOk_whenEmailPresent() {
         val mockUser = mock(OAuth2User::class.java)
         `when`(mockUser.attributes).thenReturn(mapOf("email" to "john.doe@student.hu.nl"))
         val environment = "test-env"
 
-        val response = controller.getDashboard(environment, mockUser)
+        val response = controller.startPythonScript(environment, mockUser)
 
         verify(service).startPythonScript("john.doe@student.hu.nl", environment)
         assertEquals(ResponseEntity.ok().build<Void>(), response)
     }
 
     @Test
-    fun getDashboard_returnsUnauthorized_whenEmailMissing() {
+    fun startPythonScript_returnsUnauthorized_whenEmailMissing() {
         val mockUser = mock(OAuth2User::class.java)
         `when`(mockUser.attributes).thenReturn(emptyMap<String, Any>())
         val environment = "test-env"
 
-        val response = controller.getDashboard(environment, mockUser)
+        val response = controller.startPythonScript(environment, mockUser)
 
         verify(service, never()).startPythonScript(anyString(), anyString())
         assertEquals(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build<Void>(), response)
     }
 
     @Test
-    fun getDashboard_returnsUnauthorized_whenEmailIsBlank() {
+    fun startPythonScript_returnsUnauthorized_whenEmailIsBlank() {
         val mockUser = mock(OAuth2User::class.java)
         `when`(mockUser.attributes).thenReturn(mapOf("email" to ""))
         val environment = "test-env"
 
-        val response = controller.getDashboard(environment, mockUser)
+        val response = controller.startPythonScript(environment, mockUser)
 
         verify(service, never()).startPythonScript(anyString(), anyString())
         assertEquals(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build<Void>(), response)

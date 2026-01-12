@@ -17,7 +17,7 @@ class PythonGatewayControllerV1(
 ) {
 
     @PostMapping(("/{environment}/"))
-    fun getDashboard(@PathVariable environment: String, @AuthenticationPrincipal user: OAuth2User): ResponseEntity<Void> {
+    fun startPythonScript(@PathVariable environment: String, @AuthenticationPrincipal user: OAuth2User): ResponseEntity<Void> {
         val email = user.attributes["email"] as? String
         if (email.isNullOrBlank()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()

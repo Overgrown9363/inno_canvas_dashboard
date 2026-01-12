@@ -22,7 +22,7 @@ class PythonGatewayControllerV1IntegrationTest {
     lateinit var service: PythonGatewayService
 
     @Test
-    fun getDashboard_returnsOk_whenEmailPresent() {
+    fun startPythonScript_returnsOk_whenEmailPresent() {
         val environment = "ENV_TWO"
         val email = "john.doe@student.hu.nl"
 
@@ -38,7 +38,7 @@ class PythonGatewayControllerV1IntegrationTest {
     }
 
     @Test
-    fun getDashboard_returnsUnauthorized_whenEmailMissing() {
+    fun startPythonScript_returnsUnauthorized_whenEmailMissing() {
         val environment = "ENV_TWO"
 
         mockMvc.perform(
@@ -53,7 +53,7 @@ class PythonGatewayControllerV1IntegrationTest {
     }
 
     @Test
-    fun getDashboard_returnsUnauthorized_whenEmailIsBlank() {
+    fun startPythonScript_returnsUnauthorized_whenEmailIsBlank() {
         val environment = "ENV_TWO"
 
         mockMvc.perform(

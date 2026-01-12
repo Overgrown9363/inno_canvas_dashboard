@@ -3,7 +3,7 @@ const FORBIDDEN_STATUS = 403;
 const SERVER_ERROR_STATUS = 500;
 const BAD_GATEWAY_STATUS = 502;
 
-export async function refreshCanvasData() {
+export async function renewCanvasData() {
     const response = await fetch('/api/v1/scripts/ENV_TWO/', {
         method: 'POST',
         credentials: 'include',
@@ -33,7 +33,7 @@ export async function refreshCanvasData() {
     }
 }
 
-export async function refreshDashboards() {
+export async function renewDashboardHtmls() {
     const response = await fetch('/api/v1/scripts/ENV_THREE/', {
         method: 'POST',
         credentials: 'include',
