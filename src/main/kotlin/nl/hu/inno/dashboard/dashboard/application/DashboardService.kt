@@ -11,4 +11,5 @@ interface DashboardService {
     fun getDashboardHtml(email: String, instanceName: String, relativeRequestPath: String): Resource
     fun refreshUsersAndCoursesWithRoleCheck(email: String)
     fun refreshUsersAndCoursesInternal()
+    fun verifyUserIsAdminOrSuperAdmin(email: String)
 }

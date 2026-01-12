@@ -14,16 +14,13 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/dashboard/")
-class V1DashboardController(
+class DashboardControllerV1(
     private val service: DashboardServiceImpl
     ) {
 
     @GetMapping("/users")
     fun getCurrentUser(@AuthenticationPrincipal user: OAuth2User): ResponseEntity<UsersDTO> {
-        val email = user.attributes["email"] as? String
-        if (email.isNullOrBlank()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
+        val email = getEmailOrUnauthorized(user) ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val userDTO = service.findUserByEmail(email)
         return ResponseEntity.ok(userDTO)
@@ -32,10 +29,7 @@ class V1DashboardController(
     @GetMapping("/users/admin")
     fun getAllAdminUsers(@AuthenticationPrincipal user: OAuth2User): ResponseEntity<List<AdminDTO>> {
 //        SUPERADMIN only function
-        val email = user.attributes["email"] as? String
-        if (email.isNullOrBlank()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
+        val email = getEmailOrUnauthorized(user) ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val userDTO = service.findAllAdmins(email)
         return ResponseEntity.ok(userDTO)
@@ -44,10 +38,7 @@ class V1DashboardController(
     @PutMapping("/users/admin")
     fun updateAdminRoles(@AuthenticationPrincipal user: OAuth2User, @RequestBody updatedUsers: List<UserPutRequest>): ResponseEntity<List<AdminDTO>> {
 //        SUPERADMIN only function
-        val email = user.attributes["email"] as? String
-        if (email.isNullOrBlank()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
+        val email = getEmailOrUnauthorized(user) ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val usersToUpdate = updatedUsers.map { AdminDTO(it.email, it.name, it.appRole) }
         val userDTO = service.updateAdminUserRoles(email, usersToUpdate)
@@ -58,10 +49,7 @@ class V1DashboardController(
     fun getDashboard(@PathVariable instanceName: String, @AuthenticationPrincipal user: OAuth2User, request: HttpServletRequest): ResponseEntity<Resource> {
         val relativeRequestPath = request.requestURI.removePrefix("/api/v1/dashboard/")
 
-        val email = user.attributes["email"] as? String
-        if (email.isNullOrBlank()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
+        val email = getEmailOrUnauthorized(user) ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         val resource = service.getDashboardHtml(email, instanceName, relativeRequestPath)
         return ResponseEntity.ok(resource)
@@ -70,12 +58,14 @@ class V1DashboardController(
     @PostMapping("/users/refresh")
     fun refreshUsersAndCourses(@AuthenticationPrincipal user: OAuth2User): ResponseEntity<Void> {
 //        ADMIN and SUPERADMIN only function
-        val email = user.attributes["email"] as? String
-        if (email.isNullOrBlank()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
+        val email = getEmailOrUnauthorized(user) ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
 
         service.refreshUsersAndCoursesWithRoleCheck(email)
         return ResponseEntity.ok().build()
+    }
+
+    private fun getEmailOrUnauthorized(user: OAuth2User): String? {
+        val email = user.attributes["email"] as? String
+        return if (email.isNullOrBlank()) null else email
     }
 }

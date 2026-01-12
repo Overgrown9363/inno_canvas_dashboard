@@ -1,9 +1,10 @@
 const UNAUTHORIZED_STATUS = 401;
 const FORBIDDEN_STATUS = 403;
 const SERVER_ERROR_STATUS = 500;
+const BAD_GATEWAY_STATUS = 502;
 
-export async function refreshCanvasData() {
-    const response = await fetch('', {
+export async function renewCanvasData() {
+    const response = await fetch('/api/v1/scripts/ENV_TWO/', {
         method: 'POST',
         credentials: 'include',
     });
@@ -21,6 +22,9 @@ export async function refreshCanvasData() {
             case SERVER_ERROR_STATUS:
                 errorMessage = 'Er is een serverfout opgetreden; de Canvas-gegevens zijn niet ververst.';
                 break;
+            case BAD_GATEWAY_STATUS:
+                errorMessage = 'De backend kon geen verbinding maken met de Python-omgeving; de Canvas-gegevens zijn niet ververst.';
+                break;
             default:
                 errorMessage = 'Er is iets misgegaan; de Canvas-gegevens zijn niet ververst.';
         }
@@ -29,8 +33,8 @@ export async function refreshCanvasData() {
     }
 }
 
-export async function refreshDashboards() {
-    const response = await fetch('', {
+export async function renewDashboardHtmls() {
+    const response = await fetch('/api/v1/scripts/ENV_THREE/', {
         method: 'POST',
         credentials: 'include',
     });
@@ -47,6 +51,9 @@ export async function refreshDashboards() {
                 break;
             case SERVER_ERROR_STATUS:
                 errorMessage = 'Er is een serverfout opgetreden; de dashboards zijn niet vernieuwd.';
+                break;
+            case BAD_GATEWAY_STATUS:
+                errorMessage = 'De backend kon geen verbinding maken met de Python-omgeving; de dashboards zijn niet vernieuwd.';
                 break;
             default:
                 errorMessage = 'Er is iets misgegaan; de dashboards zijn niet vernieuwd.';

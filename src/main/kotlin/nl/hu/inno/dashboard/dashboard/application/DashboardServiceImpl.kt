@@ -52,6 +52,13 @@ class DashboardServiceImpl(
         return updatedUserList.map { AdminDTO.of(it) }
     }
 
+    override fun verifyUserIsAdminOrSuperAdmin(email: String) {
+        val requestUser = findUserInDatabaseByEmail(email)
+        if (requestUser.appRole != AppRole.SUPERADMIN && requestUser.appRole != AppRole.ADMIN) {
+            throw UserNotAuthorizedException("User with $email does not have the authorization to make this request")
+        }
+    }
+
     override fun getDashboardHtml(email: String, instanceName: String, relativeRequestPath: String): Resource {
         val user = findUserInDatabaseByEmail(email)
 
@@ -176,13 +183,6 @@ class DashboardServiceImpl(
     private fun verifyUserIsSuperAdmin(email: String) {
         val requestUser = findUserInDatabaseByEmail(email)
         if (requestUser.appRole != AppRole.SUPERADMIN) {
-            throw UserNotAuthorizedException("User with $email does not have the authorization to make this request")
-        }
-    }
-
-    private fun verifyUserIsAdminOrSuperAdmin(email: String) {
-        val requestUser = findUserInDatabaseByEmail(email)
-        if (requestUser.appRole != AppRole.SUPERADMIN && requestUser.appRole != AppRole.ADMIN) {
             throw UserNotAuthorizedException("User with $email does not have the authorization to make this request")
         }
     }
