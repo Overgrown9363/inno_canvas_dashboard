@@ -45,35 +45,16 @@ class PythonRestClientTest {
     }
 
     @Test
-    fun postToPythonEnvironment_throwsBadRequest_whenResponseBadRequest() {
-        val response = ResponseEntity<Void>(HttpStatus.BAD_REQUEST)
-        `when`(restTemplate.postForEntity(eq(envTwoUrl), isNull(), eq(Void::class.java))).thenReturn(response)
+    fun postToPythonEnvironment_throwsPythonGatewayException_whenRestTemplateThrowsException() {
+        val exceptionMessage = "Connection refused"
+        `when`(restTemplate.postForEntity(eq(envTwoUrl), isNull(), eq(Void::class.java)))
+            .thenThrow(RuntimeException(exceptionMessage))
 
         val exception = assertThrows(PythonGatewayException::class.java) {
             client.postToPythonEnvironment(PythonEnvironment.ENV_TWO)
         }
-        assertEquals("Bad request to Python environment", exception.message)
-    }
 
-    @Test
-    fun postToPythonEnvironment_throwsInternalServerError_whenResponseInternalServerError() {
-        val response = ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR)
-        `when`(restTemplate.postForEntity(eq(envThreeUrl), isNull(), eq(Void::class.java))).thenReturn(response)
-
-        val exception = assertThrows(PythonGatewayException::class.java) {
-            client.postToPythonEnvironment(PythonEnvironment.ENV_THREE)
-        }
-        assertEquals("Python environment error", exception.message)
-    }
-
-    @Test
-    fun postToPythonEnvironment_throwsUnexpectedResponse_whenResponseOtherStatus() {
-        val response = ResponseEntity<Void>(HttpStatus.NOT_FOUND)
-        `when`(restTemplate.postForEntity(eq(envTwoUrl), isNull(), eq(Void::class.java))).thenReturn(response)
-
-        val exception = assertThrows(PythonGatewayException::class.java) {
-            client.postToPythonEnvironment(PythonEnvironment.ENV_TWO)
-        }
-        assertEquals("Unexpected response: 404 NOT_FOUND", exception.message)
+        assertEquals("Python environment unreachable: $exceptionMessage", exception.message)
+        verify(restTemplate).postForEntity(eq(envTwoUrl), isNull(), eq(Void::class.java))
     }
 }

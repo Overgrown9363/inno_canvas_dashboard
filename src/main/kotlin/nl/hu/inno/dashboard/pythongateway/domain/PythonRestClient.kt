@@ -2,8 +2,6 @@ package nl.hu.inno.dashboard.pythongateway.domain
 
 import nl.hu.inno.dashboard.exception.exceptions.PythonGatewayException
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.postForEntity
@@ -21,20 +19,11 @@ class PythonRestClient(
             PythonEnvironment.ENV_TWO -> pythonEnvTwoUrl
             PythonEnvironment.ENV_THREE -> pythonEnvThreeUrl
         }
-        val response: ResponseEntity<Void> = restTemplate.postForEntity<Void>(url)
 
-        when (response.statusCode) {
-            HttpStatus.OK -> {
-            }
-            HttpStatus.BAD_REQUEST -> {
-                throw PythonGatewayException("Bad request to Python environment")
-            }
-            HttpStatus.INTERNAL_SERVER_ERROR -> {
-                throw PythonGatewayException("Python environment error")
-            }
-            else -> {
-                throw PythonGatewayException("Unexpected response: ${response.statusCode}")
-            }
+        try {
+            restTemplate.postForEntity<Void>(url)
+        } catch (ex: Exception) {
+            throw PythonGatewayException("Python environment unreachable: ${ex.message}")
         }
     }
 }
