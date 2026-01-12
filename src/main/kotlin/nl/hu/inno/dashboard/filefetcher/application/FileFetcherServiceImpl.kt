@@ -7,6 +7,7 @@ import org.springframework.core.io.FileSystemResource
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 import java.nio.file.Paths
+import org.slf4j.LoggerFactory
 
 @Service
 class FileFetcherServiceImpl(
@@ -17,18 +18,54 @@ class FileFetcherServiceImpl(
     private val htmlPathResolver: HtmlPathResolver
 ) : FileFetcherService {
 
+    companion object {
+        private val log = LoggerFactory.getLogger(FileFetcherServiceImpl::class.java)
+    }
+
     override fun fetchCsvFile(): Resource {
         val path = Paths.get(pathToSharedDataVolume, coursesDirectory, "user_data.csv").toString()
+        log.debug("Fetching CSV file: path={}", path)
         return FileSystemResource(path)
     }
 
-    override fun fetchDashboardHtml(email: String, role: String, courseCode: String, instanceName: String, relativeRequestPath: String): Resource {
-        val baseUrlWithInstance = Paths.get(pathToSharedDataVolume, coursesDirectory, courseCode, instanceName, "dashboard").toString()
+    override fun fetchDashboardHtml(
+        email: String,
+        role: String,
+        courseCode: String,
+        instanceName: String,
+        relativeRequestPath: String
+    ): Resource {
+
+        log.debug(
+            "fetchDashboardHtml requested: email={}, role={}, courseCode={}, instanceName={}, path={}",
+            email,
+            role,
+            courseCode,
+            instanceName,
+            relativeRequestPath
+        )
+
+        val baseUrlWithInstance = Paths.get(
+            pathToSharedDataVolume,
+            coursesDirectory,
+            courseCode,
+            instanceName,
+            "dashboard"
+        ).toString()
+
         val resolvedPath = htmlPathResolver.resolvePath(email, role, instanceName, relativeRequestPath)
         val fullPath = Paths.get(baseUrlWithInstance, resolvedPath).toString()
 
+        log.debug("Resolved dashboard HTML path: {}", fullPath)
+
         val resource = FileSystemResource(fullPath)
         if (!resource.exists()) {
+            log.warn(
+                "Dashboard HTML not found: email={}, role={}, resolvedPath={}",
+                email,
+                role,
+                resolvedPath
+            )
             throw InvalidPathException("Path $resolvedPath did not lead to an existing resource")
         }
 
