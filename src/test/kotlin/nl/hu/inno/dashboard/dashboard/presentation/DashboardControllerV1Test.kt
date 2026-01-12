@@ -17,14 +17,14 @@ import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.Resource
 
-class V1DashboardControllerTest {
+class DashboardControllerV1Test {
     private lateinit var service: DashboardServiceImpl
-    private lateinit var controller: V1DashboardController
+    private lateinit var controller: DashboardControllerV1
 
     @BeforeEach
     fun setUp() {
         service = mock(DashboardServiceImpl::class.java)
-        controller = V1DashboardController(service)
+        controller = DashboardControllerV1(service)
     }
 
     @Test
