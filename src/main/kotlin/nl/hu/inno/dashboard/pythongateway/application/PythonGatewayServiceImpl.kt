@@ -5,6 +5,7 @@ import nl.hu.inno.dashboard.exception.exceptions.InvalidPythonEnvironmentExcepti
 import nl.hu.inno.dashboard.pythongateway.domain.PythonEnvironment
 import nl.hu.inno.dashboard.pythongateway.domain.PythonRestClient
 import org.springframework.stereotype.Service
+import org.slf4j.LoggerFactory
 
 @Service
 class PythonGatewayServiceImpl(
@@ -12,10 +13,16 @@ class PythonGatewayServiceImpl(
     private val pythonRestClient: PythonRestClient
 ) : PythonGatewayService {
 
+    companion object {
+        private val log = LoggerFactory.getLogger(PythonGatewayServiceImpl::class.java)
+    }
+
     override fun startPythonScript(email: String, environment: String) {
+        log.info("startPythonScript requested: email={}, environment={}", email, environment)
         dashboardService.verifyUserIsAdminOrSuperAdmin(email)
 
         val requestedEnvironment = parsePythonEnvironment(environment)
+        log.info("Posting to python environment: env={}, requestedBy={}", requestedEnvironment, email)
         pythonRestClient.postToPythonEnvironment(requestedEnvironment)
     }
 
@@ -23,6 +30,9 @@ class PythonGatewayServiceImpl(
         when (environment.trim().uppercase()) {
             "ENV_TWO" -> PythonEnvironment.ENV_TWO
             "ENV_THREE" -> PythonEnvironment.ENV_THREE
-            else -> throw InvalidPythonEnvironmentException("Invalid Python environment: $environment")
+            else -> {
+                log.warn("Invalid python environment requested: email={}, environment={}", /* email unknown here */ "unknown", environment)
+                throw InvalidPythonEnvironmentException("Invalid Python environment: $environment")
+            }
     }
 }
