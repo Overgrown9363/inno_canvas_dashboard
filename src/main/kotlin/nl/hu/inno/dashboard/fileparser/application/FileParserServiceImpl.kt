@@ -12,39 +12,22 @@ class FileParserServiceImpl(
     private val fileParsers: List<FileParser>,
 ) : FileParserService {
 
-    companion object {
-        private val log = LoggerFactory.getLogger(FileFetcherServiceImpl::class.java)
-    }
-
     override fun parseFile(resource: Resource): List<List<String>> {
-        log.debug("parseFile requested: filename={}", resource.filename)
-
         val parser = selectParser(resource)
-        log.debug(
-            "Parser selected: parserClass={}, filename={}",
-            parser::class.simpleName,
-            resource.filename
-        )
         return parser.parse(resource)
     }
 
     private fun selectParser(resource: Resource): FileParser {
         for (parser in fileParsers) {
             if (parser.supports(resource)) {
-                log.debug(
-                    "Parser supports resource: parserClass={}, filename={}",
-                    parser::class.simpleName,
-                    resource.filename
-                )
                 return parser
             }
         }
-        log.warn(
-            "No parser found for resource: filename={}, availableParsers={}",
-            resource.filename,
-            fileParsers.map { it::class.simpleName }
-        )
-
+        log.warn("No parser found for resource: filename={}, availableParsers={}", resource.filename, fileParsers.map { it::class.simpleName })
         throw FileTypeNotSupportedException("No available parser found for file: ${resource.filename}")
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(FileParserServiceImpl::class.java)
     }
 }

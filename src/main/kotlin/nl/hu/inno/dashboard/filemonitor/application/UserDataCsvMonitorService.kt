@@ -26,43 +26,31 @@ class UserDataCsvMonitorService(
     private val hashChecker: HashChecker
 ) : FileMonitorService {
 
-    companion object {
-        private val log = LoggerFactory.getLogger(UserDataCsvMonitorService::class.java)
-    }
-
     private var monitor: FileAlterationMonitor? = null
     private val csvFileName = "user_data.csv"
     private val csvDirectoryPath: String = Paths.get(pathToSharedDataVolume, coursesDirectory).toString()
     private var lastHash: String? = null
 
-//    TODO: replace println's and e.printStackTrace()'s here and in HashChecker with proper logging
-
     @PostConstruct
     override fun startWatching() {
-        println("_____ initializing monitor on user_data.csv _____")
         log.info("Initializing monitor on {}", csvFileName)
         val observer = createObserver()
         monitor = FileAlterationMonitor(intervalInMillis, observer)
 
         try {
         monitor?.start()
-        println("_____ monitor successfully started _____")
-            log.info("Monitor successfully started (intervalMs={}, path={})", intervalInMillis, csvDirectoryPath)
         } catch (e: Exception) {
-            e.printStackTrace()
+            log.error("Error starting monitor", e)
         }
     }
 
     @PreDestroy
     override fun stopWatching() {
         try {
-            println("_____ gracefully stopping monitor on user_data.csv _____")
             log.info("Gracefully stopping monitor on {}", csvFileName)
             monitor?.stop()
-            println("_____ monitor successfully stopped _____")
-            log.info("Monitor successfully stopped")
         } catch (e: Exception) {
-            e.printStackTrace()
+            log.error("Error stopping monitor", e)
         }
     }
 
@@ -84,15 +72,11 @@ class UserDataCsvMonitorService(
     }
 
     private fun handleFileChange(file: File) {
-        log.info("Detected change/create event: file={}", file.absolutePath)
-
         val (changed, newHash) = hashChecker.isContentChanged(file, lastHash)
         if (changed) {
-            log.info("File content changed (hash changed). Triggering refresh. file={}", file.name)
+            log.info("File content changed (hash changed). Triggering function: refreshUsersAndCoursesInternal. file={}", file.name)
             lastHash = newHash
             dashboardService.refreshUsersAndCoursesInternal()
-        } else {
-            log.debug("File event ignored (content unchanged). file={}", file.name)
         }
     }
 
@@ -102,6 +86,9 @@ class UserDataCsvMonitorService(
             log.error("CSV directory not readable/does not exist: path={}", csvDirectoryPath)
             throw IllegalStateException("Directory $csvDirectoryPath does not exist or is not readable.")
         }
-        log.debug("CSV directory verified: path={}", csvDirectoryPath)
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(UserDataCsvMonitorService::class.java)
     }
 }

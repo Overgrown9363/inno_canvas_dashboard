@@ -29,12 +29,7 @@ class DashboardServiceImpl(
     @PersistenceContext private val entityManager: EntityManager,
 ) : DashboardService {
 
-    companion object {
-        private val log = LoggerFactory.getLogger(DashboardServiceImpl::class.java)
-    }
-
     override fun findUserByEmail(email: String): UsersDTO {
-        log.debug("findUserByEmail: {}", email)
         val user = findUserInDatabaseByEmail(email)
         return UsersDTO.of(user)
     }
@@ -47,52 +42,30 @@ class DashboardServiceImpl(
         val adminRoles = listOf(AppRole.ADMIN, AppRole.SUPERADMIN)
         val adminList = usersDb.findAllAdminCandidates(adminRoles, adminEmailSuffix)
 
-        log.debug("findAllAdmins result count={}", adminList.size)
         return adminList.map { AdminDTO.of(it) }
     }
 
     override fun updateAdminUserRoles(email: String, usersToUpdate: List<AdminDTO>): List<AdminDTO> {
-        log.info(
-            "updateAdminUserRoles requested by email={}, usersToUpdateCount={}",
-            email,
-            usersToUpdate.size
-        )
+        log.info("updateAdminUserRoles requested by email={}, usersToUpdateCount={}", email, usersToUpdate.size)
         verifyUserIsSuperAdmin(email)
 
         val updatedUserList = mutableListOf<Users>()
         updateUserRoles(usersToUpdate, updatedUserList)
         usersDb.saveAll(updatedUserList)
 
-        log.info("updateAdminUserRoles completed: updatedCount={}", updatedUserList.size)
         return updatedUserList.map { AdminDTO.of(it) }
     }
 
     override fun verifyUserIsAdminOrSuperAdmin(email: String) {
         val requestUser = findUserInDatabaseByEmail(email)
         if (requestUser.appRole != AppRole.SUPERADMIN && requestUser.appRole != AppRole.ADMIN) {
-            log.warn(
-                "Authorization failed: email={}, required=ADMIN|SUPERADMIN, actual={}",
-                email,
-                requestUser.appRole
-            )
+            log.warn("Authorization failed: email={}, required=ADMIN|SUPERADMIN, actual={}", email, requestUser.appRole)
             throw UserNotAuthorizedException("User with $email does not have the authorization to make this request")
         }
         log.debug("Authorization OK: email={}, role={}", email, requestUser.appRole)
     }
 
-    override fun getDashboardHtml(
-        email: String,
-        instanceName: String,
-        relativeRequestPath: String
-    ): Resource {
-
-        log.debug(
-            "getDashboardHtml requested: email={}, instanceName={}, path={}",
-            email,
-            instanceName,
-            relativeRequestPath
-        )
-
+    override fun getDashboardHtml(email: String, instanceName: String, relativeRequestPath: String): Resource {
         val user = findUserInDatabaseByEmail(email)
 
         val userInCourse = user.userInCourse.firstOrNull { it.course?.instanceName == instanceName }
@@ -104,7 +77,7 @@ class DashboardServiceImpl(
         val userRole = userInCourse.courseRole?.name
             ?: run {
                 log.error("CourseRole missing: email={}, instanceName={}", email, instanceName)
-                throw CourseNotFoundException("Could not find course with code $instanceName")
+                throw InvalidRoleException("Could not find courseRole for user with email $email in course $instanceName")
             }
 
         val courseCode = userInCourse.course?.courseCode
@@ -113,13 +86,7 @@ class DashboardServiceImpl(
                 throw CourseNotFoundException("Could not find course with code $instanceName")
             }
 
-        return fileFetcherService.fetchDashboardHtml(
-            email,
-            userRole,
-            courseCode,
-            instanceName,
-            relativeRequestPath
-        )
+        return fileFetcherService.fetchDashboardHtml(email, userRole, courseCode, instanceName, relativeRequestPath)
     }
 
     override fun refreshUsersAndCoursesWithRoleCheck(email: String) {
@@ -208,6 +175,7 @@ class DashboardServiceImpl(
             log.warn("User not found: email={}", email)
             throw UserNotFoundException("User with email $email not found")
         }
+
         return user
     }
 
@@ -228,23 +196,14 @@ class DashboardServiceImpl(
                 "USER" -> AppRole.USER
                 "ADMIN" -> AppRole.ADMIN
                 else -> {
-                    log.warn(
-                        "Invalid role provided: targetEmail={}, role={}",
-                        changedUser.email,
-                        changedUser.appRole
-                    )
+                    log.warn("Invalid role provided: targetEmail={}, role={}", changedUser.email, changedUser.appRole)
                     throw InvalidRoleException("AppRole ${changedUser.appRole} is not a valid role")
                 }
             }
 
 //            only update user if their role changed
             if (user.appRole != newAppRole) {
-                log.info(
-                    "Updating role: email={}, from={}, to={}",
-                    user.email,
-                    user.appRole,
-                    newAppRole
-                )
+                log.info("Updating role: email={}, from={}, to={}", user.email, user.appRole, newAppRole)
                 user.appRole = newAppRole
                 updatedUserList.add(user)
             }
@@ -254,11 +213,7 @@ class DashboardServiceImpl(
     private fun verifyUserIsSuperAdmin(email: String) {
         val requestUser = findUserInDatabaseByEmail(email)
         if (requestUser.appRole != AppRole.SUPERADMIN) {
-            log.warn(
-                "SuperAdmin check failed: email={}, actualRole={}",
-                email,
-                requestUser.appRole
-            )
+            log.warn("SuperAdmin check failed: email={}, actualRole={}", email, requestUser.appRole)
             throw UserNotAuthorizedException("User with $email does not have the authorization to make this request")
         }
         log.debug("SuperAdmin check OK: email={}", email)
@@ -299,5 +254,9 @@ class DashboardServiceImpl(
         const val USER_NAME = 6
         const val USER_EMAIL = 7
         const val COURSE_ROLE = 8
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(DashboardServiceImpl::class.java)
     }
 }

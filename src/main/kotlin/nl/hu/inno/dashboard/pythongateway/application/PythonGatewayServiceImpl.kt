@@ -13,10 +13,6 @@ class PythonGatewayServiceImpl(
     private val pythonRestClient: PythonRestClient
 ) : PythonGatewayService {
 
-    companion object {
-        private val log = LoggerFactory.getLogger(PythonGatewayServiceImpl::class.java)
-    }
-
     override fun startPythonScript(email: String, environment: String) {
         log.info("startPythonScript requested: email={}, environment={}", email, environment)
         dashboardService.verifyUserIsAdminOrSuperAdmin(email)
@@ -31,8 +27,12 @@ class PythonGatewayServiceImpl(
             "ENV_TWO" -> PythonEnvironment.ENV_TWO
             "ENV_THREE" -> PythonEnvironment.ENV_THREE
             else -> {
-                log.warn("Invalid python environment requested: email={}, environment={}", /* email unknown here */ "unknown", environment)
+                log.warn("Invalid python environment requested: environment={}", environment)
                 throw InvalidPythonEnvironmentException("Invalid Python environment: $environment")
             }
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(PythonGatewayServiceImpl::class.java)
     }
 }
