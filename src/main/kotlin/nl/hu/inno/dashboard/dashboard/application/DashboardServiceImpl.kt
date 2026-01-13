@@ -98,7 +98,6 @@ class DashboardServiceImpl(
 
     override fun refreshUsersAndCoursesInternal() {
 //        entry point to refreshUsersAndCourses from FileMonitor component
-        log.info("refreshUsersAndCoursesInternal triggered (FileMonitor)")
         refreshUsersAndCourses()
     }
 
