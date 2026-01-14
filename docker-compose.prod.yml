@@ -22,7 +22,7 @@ services:
       AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
       AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
     volumes:
-      - shared-data:/shared-data
+      - /opt/shared-data:/shared-data
     expose:
       - "8080"
 
