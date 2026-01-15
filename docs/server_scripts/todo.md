@@ -1,1 +1,0 @@
-TODO: scripts toevoegen voor server installatie/beheer etc
