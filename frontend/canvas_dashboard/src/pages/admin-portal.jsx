@@ -46,7 +46,7 @@ const AdminDashboard = () => {
     }
 
     function handleHealth() {
-        navigate('/health');
+        navigate('/health/login');
     }
 
     async function handleRefreshResults() {
